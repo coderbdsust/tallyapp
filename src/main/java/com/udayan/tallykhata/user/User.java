@@ -1,0 +1,85 @@
+package com.udayan.tallykhata.user;
+
+
+import com.udayan.tallykhata.model.BaseEntity;
+import com.udayan.tallykhata.user.address.Address;
+import com.udayan.tallykhata.user.role.Role;
+import com.udayan.tallykhata.user.token.Token;
+import jakarta.persistence.*;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.security.Principal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static jakarta.persistence.FetchType.EAGER;
+
+@Entity
+@Table(name="users")
+@Data
+public class User extends BaseEntity implements UserDetails, Principal {
+
+    @Column(unique = true, nullable = false)
+    private String username;
+    private String password;
+    private String salt;
+    @Column(unique = true, nullable = false)
+    private String email;
+    @Column(unique = true, nullable = false)
+    private String mobileNo;
+    private Boolean isMobileNumberVerified=false;
+    private String fullName;
+    private LocalDate dateOfBirth;
+    private Boolean enabled = false;
+    private Boolean accountLocked=false;
+    private Boolean tfaEnabled=false;
+    @ManyToMany(fetch = EAGER)
+    private List<Role> roles;
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
+    @OneToMany(mappedBy = "user")
+    private List<Address> addresses;
+
+    @Override
+    public String getName() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !accountLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public ArrayList<String> getUserRoles() {
+        return this.roles.stream().map(Role::getName).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles
+                .stream()
+                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getName()))
+                .collect(Collectors.toList());
+    }
+}

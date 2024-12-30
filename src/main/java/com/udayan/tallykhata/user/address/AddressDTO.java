@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 public class AddressDTO {
 
     @Data
@@ -14,7 +16,7 @@ public class AddressDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class AddressRequest {
-        private Long id;
+        private UUID id;
         @NotEmpty(message = "House name can't be empty")
         private String houseName;
         @NotEmpty(message = "Road name can't be empty")
@@ -36,7 +38,7 @@ public class AddressDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class AddressResponse {
-        private Long id;
+        private UUID id;
         private String houseName;
         private String roadName;
         private String villageName;

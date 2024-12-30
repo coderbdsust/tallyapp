@@ -17,6 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class BeansConfig {
     }
 
     @Bean
-    public AuditorAware<Long> auditorAware() {
+    public AuditorAware<UUID> auditorAware() {
         return new ApplicationAuditAware();
     }
 

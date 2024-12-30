@@ -26,6 +26,7 @@ public class UserMapper {
         List<AddressDTO.AddressResponse> addressResponseList = addressMapper.addressToAddressResponseList(addressList);
 
         return RegisteredUserResponse.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .enabled(user.getEnabled())
                 .accountLocked(user.getAccountLocked())

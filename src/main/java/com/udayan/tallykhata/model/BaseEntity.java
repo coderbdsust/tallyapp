@@ -11,16 +11,14 @@ import java.util.UUID;
 public class BaseEntity {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy=GenerationType.UUID)
+    private UUID id;
     @Column(name = "created_date", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdDate;
     @Column(name = "updated_date")
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedDate;
-    @Column(unique = true, nullable = false, updatable = false)
-    private String uuid=UUID.randomUUID().toString();
 
     @PrePersist
     public void prePersist() {

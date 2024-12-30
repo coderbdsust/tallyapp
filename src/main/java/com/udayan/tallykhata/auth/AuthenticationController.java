@@ -46,14 +46,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse> verifyUser(@Valid @RequestBody AuthUser.VerifyUserRequest user){
+    public ResponseEntity<ApiResponse> verifyUser(@Valid @RequestBody AuthUser.VerifyUserRequest user) throws InvalidDataException {
         log.info("request to verify user {}",user);
         ApiResponse verifiedUser = authService.verifyUser(user);
         return ResponseEntity.ok().body(verifiedUser);
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<ApiResponse> verifyUser(@RequestParam(required = true) @NotBlank @Size(min=4, max = 20) String username, @RequestParam(required = true) @NotBlank @Size(min=6, max = 8) String otpCode){
+    public ResponseEntity<ApiResponse> verifyUser(@RequestParam(required = true) @NotBlank @Size(min=4, max = 20) String username, @RequestParam(required = true) @NotBlank @Size(min=6, max = 8) String otpCode) throws InvalidDataException {
         log.info("request to verify username {}",username);
         ApiResponse verifiedUser = authService.verifyUser(username, otpCode);
         return ResponseEntity.ok().body(verifiedUser);

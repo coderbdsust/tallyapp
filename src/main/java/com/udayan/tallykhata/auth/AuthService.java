@@ -8,6 +8,7 @@ import com.udayan.tallykhata.security.jwt.JwtService;
 import com.udayan.tallykhata.user.User;
 import com.udayan.tallykhata.user.UserRepository;
 import com.udayan.tallykhata.user.exp.DuplicateKeyException;
+import com.udayan.tallykhata.user.exp.InvalidDataException;
 import com.udayan.tallykhata.user.exp.UserAccountIsLocked;
 import com.udayan.tallykhata.user.exp.UserNotActiveException;
 import com.udayan.tallykhata.user.otp.OTPType;
@@ -136,7 +137,7 @@ public class AuthService {
     }
 
     @Transactional
-    public ApiResponse verifyUser(String username, String otpCode) {
+    public ApiResponse verifyUser(String username, String otpCode) throws InvalidDataException {
         AuthUser.VerifyUserRequest verify = new AuthUser.VerifyUserRequest();
         verify.setUsername(username);
         verify.setOtpCode(otpCode);
@@ -144,13 +145,10 @@ public class AuthService {
     }
 
     @Transactional
-    public ApiResponse verifyUser(AuthUser.VerifyUserRequest user) {
+    public ApiResponse verifyUser(AuthUser.VerifyUserRequest user) throws InvalidDataException {
         Optional<User> usrOptional = userRepository.findByUsername(user.getUsername());
         if (usrOptional.isEmpty()) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(user.getUsername())
-                    .message("No Registered User Found For Verification").build();
+            throw new InvalidDataException("No Registered User Found For Verification");
         }
 
         User retrieveUser = usrOptional.get();
@@ -164,27 +162,18 @@ public class AuthService {
         Optional<UserOTP> otpOptional = userOTPRepository.findActiveOTPByUserIdAndCode(retrieveUser.getId(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName());
 
         if (otpOptional.isEmpty()) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(user.getUsername())
-                    .message("Invalid OTP").build();
+            throw new InvalidDataException("Invalid OTP");
         }
 
         UserOTP otp = otpOptional.get();
 
         if (otp.getIsUsed()) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(user.getUsername())
-                    .message("OTP already used").build();
+            throw new InvalidDataException("OTP already used");
         }
 
         if (LocalDateTime.now().isAfter(otp.getExpiryTime())) {
             generateOTPForUserVerification(retrieveUser);
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(user.getUsername())
-                    .message("Expired OTP, New OTP Generated").build();
+            throw new InvalidDataException("Expired OTP, New OTP Generated");
         }
 
         otp.setIsUsed(true);

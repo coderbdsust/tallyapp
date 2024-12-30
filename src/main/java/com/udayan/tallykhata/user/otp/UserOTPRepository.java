@@ -5,14 +5,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface UserOTPRepository extends JpaRepository<UserOTP, Long> {
+public interface UserOTPRepository extends JpaRepository<UserOTP, UUID> {
 
     @Query(value = """
       select t from UserOTP t\s
       where t.user.id=:userId and t.otp=:otp and t.otpType = :otpType and t.isActive=true\s
       """)
-    Optional<UserOTP> findActiveOTPByUserIdAndCode(long userId, String otp, int otpType);
+    Optional<UserOTP> findActiveOTPByUserIdAndCode(UUID userId, String otp, int otpType);
 
 }

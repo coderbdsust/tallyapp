@@ -7,11 +7,12 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class AuthUser {
     @Data
     public static class UserRequest {
-        private Long id;
+        private UUID id;
         @NotEmpty(message = "Username cannot be empty")
         @Size(min = 4, max = 30, message = "Username length must be between 4 to 30")
         @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "Username pattern is invalid")

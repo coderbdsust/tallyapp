@@ -8,16 +8,16 @@ public class ChangePassword {
     @Data
     public static class ChangeUserPasswordRequest {
 
-        @NotEmpty(message = "Current Password cannot be empty")
-        @Size(min = 8, max = 16, message = "Current Password length must be between 8 to 30")
-        private String currentPassword;
+        @NotEmpty(message = "{oldpassword.notempty}")
+        @Size(min = 8, max = 30, message = "{oldpassword.size}")
+        private String oldPassword;
 
-        @NotEmpty(message = "Password cannot be empty")
-        @Size(min = 8, max = 16, message = "Password length must be between 8 to 30")
+        @NotEmpty(message = "{password.notempty}")
+        @Size(min = 8, max = 30, message = "{password.size}")
         private String password;
 
-        @NotEmpty(message = "Confirm Password cannot be empty")
-        @Size(min = 8, max = 16, message = "Confirm Password length must be between 8 to 30")
+        @NotEmpty(message = "{confirmpassword.notempty}")
+        @Size(min = 8, max = 30, message = "{confirmpassword.size}")
         private String confirmPassword;
     }
 }

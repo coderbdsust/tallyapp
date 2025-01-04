@@ -1,6 +1,6 @@
 package com.udayan.tallykhata.auth;
 
-import com.udayan.tallykhata.auth.exp.InvalidTokenException;
+import com.udayan.tallykhata.customexp.InvalidTokenException;
 import com.udayan.tallykhata.security.jwt.JwtService;
 import com.udayan.tallykhata.user.User;
 import com.udayan.tallykhata.user.UserRepository;
@@ -32,7 +32,6 @@ public class LogoutHandlerService implements LogoutHandler {
     ) {
         log.info("logout request");
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
         }

@@ -3,7 +3,7 @@ package com.udayan.tallykhata.user.deserializer;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.udayan.tallykhata.user.exp.InvalidDateFormat;
+import com.udayan.tallykhata.customexp.InvalidDateFormat;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;

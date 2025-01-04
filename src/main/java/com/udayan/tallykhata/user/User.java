@@ -6,7 +6,10 @@ import com.udayan.tallykhata.user.address.Address;
 import com.udayan.tallykhata.user.role.Role;
 import com.udayan.tallykhata.user.token.Token;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +23,12 @@ import java.util.stream.Collectors;
 
 import static jakarta.persistence.FetchType.EAGER;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name="users")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User extends BaseEntity implements UserDetails, Principal {
 
     @Column(unique = true, nullable = false)
@@ -31,8 +37,8 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private String salt;
     @Column(unique = true, nullable = false)
     private String email;
-    @Column(unique = true, nullable = false)
     private String mobileNo;
+    private String gender;
     private Boolean isMobileNumberVerified=false;
     private String fullName;
     private LocalDate dateOfBirth;

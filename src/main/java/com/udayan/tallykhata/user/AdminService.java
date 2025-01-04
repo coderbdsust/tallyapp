@@ -2,7 +2,7 @@ package com.udayan.tallykhata.user;
 
 import com.udayan.tallykhata.common.ApiResponse;
 import com.udayan.tallykhata.common.PageResponse;
-import com.udayan.tallykhata.user.exp.InvalidDataException;
+import com.udayan.tallykhata.customexp.InvalidDataException;
 import com.udayan.tallykhata.user.mapper.UserMapper;
 import com.udayan.tallykhata.user.role.Role;
 import com.udayan.tallykhata.user.role.RoleRepository;

@@ -1,12 +1,8 @@
 package com.udayan.tallykhata.auth;
 
 
-import com.udayan.tallykhata.auth.exp.InvalidTokenException;
+import com.udayan.tallykhata.customexp.*;
 import com.udayan.tallykhata.common.ApiResponse;
-import com.udayan.tallykhata.user.exp.DuplicateKeyException;
-import com.udayan.tallykhata.user.exp.InvalidDataException;
-import com.udayan.tallykhata.user.exp.UserAccountIsLocked;
-import com.udayan.tallykhata.user.exp.UserNotActiveException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -27,7 +23,7 @@ public class AuthenticationController {
     private AuthForgotService authForgotService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthUser.UserRequest> registerUser(@Valid @RequestBody AuthUser.UserRequest user) throws DuplicateKeyException {
+    public ResponseEntity<AuthUser.UserRequest> registerUser(@Valid @RequestBody AuthUser.UserRequest user) throws DuplicateKeyException, EmailSendingException {
         log.info("request to register user {}",user);
         AuthUser.UserRequest userRes = authService.registerUser(user);
         return ResponseEntity.ok().body(userRes);
@@ -60,9 +56,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password-by-email")
-    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPassword.EmailRequest emailReq){
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPassword.EmailRequest emailReq) throws InvalidDataException, EmailSendingException {
         log.info("request to forgot password by email {}",emailReq);
-        ApiResponse res = authForgotService.doForgotPasswordByEmail(emailReq);
+        ApiResponse res = authForgotService.sendForgotPasswordRequestByEmail(emailReq);
         return ResponseEntity.ok().body(res);
     }
 

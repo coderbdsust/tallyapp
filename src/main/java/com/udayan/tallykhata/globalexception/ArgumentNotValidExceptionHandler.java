@@ -21,7 +21,7 @@ import static com.udayan.tallykhata.utils.Utils.convertToTitleCase;
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
-public class ArgumentNotValidException {
+public class ArgumentNotValidExceptionHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<?> methodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {

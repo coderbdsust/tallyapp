@@ -1,9 +1,9 @@
 package com.udayan.tallykhata.globalexception;
 
 
-import com.udayan.tallykhata.auth.exp.InvalidTokenException;
-import com.udayan.tallykhata.user.exp.*;
+import com.udayan.tallykhata.customexp.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -139,5 +139,34 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler({
+            EmailSendingException.class})
+    public ResponseEntity<?> sendingErrorException(EmailSendingException ex, HttpServletRequest request) {
+        log.error("",ex);
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.EXPECTATION_FAILED.value())
+                .error(convertToTitleCase(HttpStatus.EXPECTATION_FAILED))
+                .message(ex.getMessage())
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handle(Exception ex,
+                                         HttpServletRequest request, HttpServletResponse response) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(convertToTitleCase(HttpStatus.INTERNAL_SERVER_ERROR))
+                .message(convertToTitleCase(HttpStatus.INTERNAL_SERVER_ERROR))
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }

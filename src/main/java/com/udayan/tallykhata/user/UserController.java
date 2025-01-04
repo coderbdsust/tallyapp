@@ -2,7 +2,7 @@ package com.udayan.tallykhata.user;
 
 import com.udayan.tallykhata.user.address.AddressDTO;
 import com.udayan.tallykhata.user.address.AddressService;
-import com.udayan.tallykhata.user.exp.InvalidDataException;
+import com.udayan.tallykhata.customexp.InvalidDataException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

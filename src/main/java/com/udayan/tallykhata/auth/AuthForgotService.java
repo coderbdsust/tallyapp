@@ -1,11 +1,12 @@
 package com.udayan.tallykhata.auth;
 
 import com.udayan.tallykhata.common.ApiResponse;
+import com.udayan.tallykhata.customexp.EmailSendingException;
+import com.udayan.tallykhata.customexp.InvalidDataException;
 import com.udayan.tallykhata.email.EmailService;
 import com.udayan.tallykhata.email.EmailTemplateName;
 import com.udayan.tallykhata.user.User;
 import com.udayan.tallykhata.user.UserRepository;
-import com.udayan.tallykhata.user.exp.InvalidDataException;
 import com.udayan.tallykhata.user.mapper.UserMapper;
 import com.udayan.tallykhata.user.otp.OTPType;
 import com.udayan.tallykhata.user.otp.UserOTP;
@@ -16,9 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -40,26 +41,22 @@ public class AuthForgotService {
     @Autowired
     private EmailService emailService;
 
-    public ApiResponse doForgotPasswordByEmail(ForgotPassword.EmailRequest emailReq) {
-        Optional<User> userEmailOptional = userRepository.findByEmail(emailReq.getEmail());
-        if (userEmailOptional.isEmpty()) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .message("No user found using this email : " + emailReq.getEmail())
-                    .userDetail(emailReq.getEmail())
-                    .build();
-        }
-        UserOTP otp  = generateOTPForPasswordReset(userEmailOptional.get());
-        return sendOTPForResetPasswordEmail(userEmailOptional.get(), otp);
+    @Transactional
+    public ApiResponse sendForgotPasswordRequestByEmail(ForgotPassword.EmailRequest emailReq) throws InvalidDataException, EmailSendingException {
+        User user = userRepository.findByEmail(emailReq.getEmail())
+                .orElseThrow(()->new InvalidDataException("No user found using this email"));
+        userOTPRepository.revokeAllOTPByUserIDAndOtpType(user.getId(), OTPType.PASSWORD_RESET.getName());
+        UserOTP otp  = generateOTPForPasswordReset(user, OTPType.PASSWORD_RESET);
+        return sendOTPForResetPasswordEmail(user, otp);
     }
 
-    private UserOTP generateOTPForPasswordReset(User user) {
+    private UserOTP generateOTPForPasswordReset(User user, OTPType otpType) {
         UserOTP otp = new UserOTP();
         otp.setOtp(Utils.generateOTP(6));
         otp.setExpiryTime(LocalDateTime.now().plusMinutes(60));
         otp.setIsUsed(false);
         otp.setIsActive(true);
-        otp.setOtpType(OTPType.PASSWORD_RESET.getName());
+        otp.setOtpType(otpType.getName());
         otp.setUser(user);
         UserOTP saveOtp = userOTPRepository.save(otp);
         log.debug("{}", saveOtp);
@@ -67,7 +64,7 @@ public class AuthForgotService {
 
     }
 
-    private ApiResponse sendOTPForResetPasswordEmail(User user, UserOTP otp) {
+    private ApiResponse sendOTPForResetPasswordEmail(User user, UserOTP otp) throws EmailSendingException {
         try {
             this.emailService.sendEmailForResetPassword(
                     user.getEmail(),
@@ -86,59 +83,32 @@ public class AuthForgotService {
                     .build();
         } catch (Exception e) {
             log.error("Email sending error ", e);
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(user.getEmail())
-                    .message("OTP sending error, Please try again")
-                    .build();
+            throw new EmailSendingException("Couldn't send otp by email");
         }
     }
 
     public ApiResponse resetPassword(ForgotPassword.ResetPassword resetPassword) throws InvalidDataException {
 
         if (!resetPassword.getPassword().matches(resetPassword.getConfirmPassword())) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(resetPassword.getEmail())
-                    .message("Password and Confirm Password didn't matched")
-                    .build();
-
+            throw new InvalidDataException("Password and Confirm Password didn't matched");
         }
 
-        Optional<User> userOptional = userRepository.findByEmail(resetPassword.getEmail());
-        if (userOptional.isEmpty()) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(resetPassword.getEmail())
-                    .message("No user found using email " + resetPassword.getEmail())
-                    .build();
-        }
+        User user = userRepository.findByEmail(resetPassword.getEmail())
+                .orElseThrow(()->new InvalidDataException("No user found using email"));
 
-        String saltedPassword = resetPassword.getPassword()+userOptional.get().getSalt();
-        if(passwordEncoder.matches(saltedPassword, userOptional.get().getPassword())){
+
+        String saltedPassword = resetPassword.getPassword()+user.getSalt();
+        if(passwordEncoder.matches(saltedPassword, user.getPassword())){
             throw new InvalidDataException("You used this password recently. Please choose a different one.");
         }
 
-        Optional<UserOTP> otpOptional = userOTPRepository.findActiveOTPByUserIdAndCode(userOptional.get().getId(), resetPassword.getOtpCode(), OTPType.PASSWORD_RESET.getName());
+        UserOTP otp = userOTPRepository.findActiveOTPByUserIdAndCode(user.getId(), resetPassword.getOtpCode(), OTPType.PASSWORD_RESET.getName())
+                .orElseThrow(()->new InvalidDataException("Invalid OTP for Password Reset"));
 
-        if (otpOptional.isEmpty()) {
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(resetPassword.getEmail())
-                    .message("Invalid OTP for Password Reset")
-                    .build();
+        if(LocalDateTime.now().isAfter(otp.getExpiryTime())){
+            throw new InvalidDataException("OTP already expired");
         }
 
-        if(LocalDateTime.now().isAfter(otpOptional.get().getExpiryTime())){
-            return ApiResponse.builder()
-                    .sucs(false)
-                    .userDetail(resetPassword.getEmail())
-                    .message("OTP already expired")
-                    .build();
-        }
-
-        User user = userOptional.get();
-        UserOTP otp = otpOptional.get();
         otp.setIsActive(false);
         otp.setIsUsed(true);
         otp.setUpdatedDate(LocalDateTime.now());

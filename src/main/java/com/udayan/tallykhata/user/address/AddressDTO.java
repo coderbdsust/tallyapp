@@ -17,19 +17,15 @@ public class AddressDTO {
     @NoArgsConstructor
     public static class AddressRequest {
         private UUID id;
-        @NotEmpty(message = "House name can't be empty")
-        private String houseName;
-        @NotEmpty(message = "Road name can't be empty")
-        private String roadName;
-        private String villageName;
-        private String postOffice;
-        @NotEmpty(message = "City name can't be empty")
+        @NotEmpty(message = "{address.addressLine.notempty}")
+        private String addressLine;
+        @NotEmpty(message = "{address.city.notempty}")
         private String city;
         private String state;
-        @NotEmpty(message = "Postcode can't be empty")
-        @Pattern(regexp="\\d{4}", message = "Invalid post code, Must be 4 digit postcode")
+        @NotEmpty(message = "{address.postcode.notempty}")
+        @Pattern(regexp="\\d{4}", message = "{address.postcode.pattern}")
         private String postCode;
-        @NotEmpty(message = "Country name can't be empty")
+        @NotEmpty(message = "{address.country.notempty}")
         private String country;
     }
 
@@ -39,10 +35,7 @@ public class AddressDTO {
     @NoArgsConstructor
     public static class AddressResponse {
         private UUID id;
-        private String houseName;
-        private String roadName;
-        private String villageName;
-        private String postOffice;
+        private String addressLine;
         private String city;
         private String state;
         private String postCode;

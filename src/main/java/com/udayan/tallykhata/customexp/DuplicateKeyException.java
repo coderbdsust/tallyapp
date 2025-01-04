@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.user.exp;
+package com.udayan.tallykhata.customexp;
 
-public class DuplicateKeyException extends Throwable {
+public class DuplicateKeyException extends RuntimeException {
 
     public DuplicateKeyException(){
         super();

@@ -8,11 +8,11 @@ public class Login {
 
     @Data
     public static class LoginRequest {
-        @NotEmpty(message = "Username can't be empty")
-        @Size(min = 4, max = 30, message = "Username length must be between 4 to 30")
+        @NotEmpty(message = "{usernameOrEmail.notempty}")
+        @Size(min = 4, max = 50, message = "{usernameOrEmail.size}")
         private String username;
-        @NotEmpty(message = "Password can't be empty")
-        @Size(min = 8, max = 16, message = "Password length must be between 8 to 30")
+        @NotEmpty(message = "{password.notempty}")
+        @Size(min = 8, max = 30, message = "{password.size}")
         private String password;
     }
 
@@ -25,7 +25,7 @@ public class Login {
 
     @Data
     public static class RefreshToken {
-        @NotEmpty(message = "Refresh token can't be empty")
+        @NotEmpty(message = "{refreshtoken.notempty}")
         private String refreshToken;
     }
 }

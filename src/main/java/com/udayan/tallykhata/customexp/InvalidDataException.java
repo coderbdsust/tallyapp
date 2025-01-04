@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.user.exp;
+package com.udayan.tallykhata.customexp;
 
-public class InvalidDataException extends Throwable {
+public class InvalidDataException extends RuntimeException {
     public InvalidDataException(){
         super();
     }

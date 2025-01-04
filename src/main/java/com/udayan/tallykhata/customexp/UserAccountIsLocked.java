@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.user.exp;
+package com.udayan.tallykhata.customexp;
 
-public class UserAccountIsLocked extends Throwable {
+public class UserAccountIsLocked extends RuntimeException {
 
     public UserAccountIsLocked(){
         super();

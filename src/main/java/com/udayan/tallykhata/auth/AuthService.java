@@ -1,16 +1,12 @@
 package com.udayan.tallykhata.auth;
 
-import com.udayan.tallykhata.auth.exp.InvalidTokenException;
+import com.udayan.tallykhata.customexp.*;
 import com.udayan.tallykhata.common.ApiResponse;
 import com.udayan.tallykhata.email.EmailService;
 import com.udayan.tallykhata.email.EmailTemplateName;
 import com.udayan.tallykhata.security.jwt.JwtService;
 import com.udayan.tallykhata.user.User;
 import com.udayan.tallykhata.user.UserRepository;
-import com.udayan.tallykhata.user.exp.DuplicateKeyException;
-import com.udayan.tallykhata.user.exp.InvalidDataException;
-import com.udayan.tallykhata.user.exp.UserAccountIsLocked;
-import com.udayan.tallykhata.user.exp.UserNotActiveException;
 import com.udayan.tallykhata.user.otp.OTPType;
 import com.udayan.tallykhata.user.otp.UserOTP;
 import com.udayan.tallykhata.user.otp.UserOTPRepository;
@@ -33,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -68,7 +63,7 @@ public class AuthService {
     private String accountActivationURL;
 
     @Transactional
-    public AuthUser.UserRequest registerUser(AuthUser.UserRequest userRequest) throws DuplicateKeyException {
+    public AuthUser.UserRequest registerUser(AuthUser.UserRequest userRequest) throws DuplicateKeyException, EmailSendingException {
         Role userRole = roleRepository.findByName("USER").orElseThrow(() -> new IllegalStateException("Role 'USER' not initiated correctly"));
 
         User user = new User();
@@ -79,6 +74,7 @@ public class AuthService {
         user.setMobileNo(userRequest.getMobileNo());
         user.setFullName(userRequest.getFullName());
         user.setDateOfBirth(userRequest.getDateOfBirth());
+        user.setGender(userRequest.getGender());
         user.setRoles(List.of(userRole));
         user.setEnabled(false);
         user.setTfaEnabled(false);
@@ -92,19 +88,15 @@ public class AuthService {
             throw new DuplicateKeyException("Email already taken by user");
         }
 
-        if (userRepository.findByMobileNo(userRequest.getMobileNo()).isPresent()) {
-            throw new DuplicateKeyException("Mobile number already taken by user");
-        }
-
         user = userRepository.save(user);
         userRequest.setId(user.getId());
 
-        generateOTPForUserVerification(user);
-
+        UserOTP otp = generateOTPForUserVerification(user);
+        sendAccountActivationEmail(user, otp);
         return userRequest;
     }
 
-    private void generateOTPForUserVerification(User user) {
+    private UserOTP generateOTPForUserVerification(User user) {
         UserOTP otp = new UserOTP();
         otp.setOtp(Utils.generateOTP(6));
         otp.setExpiryTime(LocalDateTime.now().plusDays(2));
@@ -114,11 +106,10 @@ public class AuthService {
         otp.setUser(user);
         UserOTP saveOtp = userOTPRepository.save(otp);
         log.debug("{}", saveOtp);
-
-        sendAccountActivationEmail(user, otp);
+        return saveOtp;
     }
 
-    private void sendAccountActivationEmail(User user, UserOTP otp) {
+    private void sendAccountActivationEmail(User user, UserOTP otp) throws EmailSendingException {
         try {
             this.emailService.sendEmailForActivateAccount(
                     user.getEmail(),
@@ -133,6 +124,7 @@ public class AuthService {
             userOTPRepository.save(otp);
         } catch (Exception e) {
             log.error("Email sending error ", e);
+            throw new EmailSendingException("Couldn't send OTP in email for account verification");
         }
     }
 
@@ -146,12 +138,9 @@ public class AuthService {
 
     @Transactional
     public ApiResponse verifyUser(AuthUser.VerifyUserRequest user) throws InvalidDataException {
-        Optional<User> usrOptional = userRepository.findByUsername(user.getUsername());
-        if (usrOptional.isEmpty()) {
-            throw new InvalidDataException("No Registered User Found For Verification");
-        }
+        User retrieveUser = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(()->new InvalidDataException("No Registered User Found For Verification"));
 
-        User retrieveUser = usrOptional.get();
         if (retrieveUser.isEnabled()) {
             return ApiResponse.builder()
                     .sucs(true)
@@ -159,28 +148,23 @@ public class AuthService {
                     .message("User already verified").build();
         }
 
-        Optional<UserOTP> otpOptional = userOTPRepository.findActiveOTPByUserIdAndCode(retrieveUser.getId(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName());
+        UserOTP userOTP = userOTPRepository.findActiveOTPByUserIdAndCode(retrieveUser.getId(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName())
+                .orElseThrow(()->new InvalidDataException("Invalid OTP"));
 
-        if (otpOptional.isEmpty()) {
-            throw new InvalidDataException("Invalid OTP");
-        }
-
-        UserOTP otp = otpOptional.get();
-
-        if (otp.getIsUsed()) {
+        if (userOTP.getIsUsed()) {
             throw new InvalidDataException("OTP already used");
         }
 
-        if (LocalDateTime.now().isAfter(otp.getExpiryTime())) {
+        if (LocalDateTime.now().isAfter(userOTP.getExpiryTime())) {
             generateOTPForUserVerification(retrieveUser);
             throw new InvalidDataException("Expired OTP, New OTP Generated");
         }
 
-        otp.setIsUsed(true);
-        otp.setIsActive(false);
-        otp.setValidatedTime(LocalDateTime.now());
-        otp.setUpdatedDate(LocalDateTime.now());
-        userOTPRepository.save(otp);
+        userOTP.setIsUsed(true);
+        userOTP.setIsActive(false);
+        userOTP.setValidatedTime(LocalDateTime.now());
+        userOTP.setUpdatedDate(LocalDateTime.now());
+        userOTPRepository.save(userOTP);
 
         retrieveUser.setEnabled(true);
         retrieveUser.setUpdatedDate(LocalDateTime.now());
@@ -206,7 +190,7 @@ public class AuthService {
     public Login.LoginResponse doLogin(Login.LoginRequest request) throws UserNotActiveException, UserAccountIsLocked {
 
         User usr = userRepository.findByUsernameOrEmail(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Username or Email not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Wrong username or email"));
 
         if (!usr.isEnabled()) {
             throw new UserNotActiveException("User not activated yet, Please check email");

@@ -7,13 +7,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="user_otp")
 @Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserOTP extends BaseEntity {
     @Column(nullable = false)
     private String otp;
@@ -24,5 +27,6 @@ public class UserOTP extends BaseEntity {
     private LocalDateTime expiryTime;
     private LocalDateTime validatedTime;
     @ManyToOne
+    @ToString.Exclude
     private User user;
 }

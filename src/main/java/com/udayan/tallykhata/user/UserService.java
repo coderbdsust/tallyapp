@@ -2,7 +2,7 @@ package com.udayan.tallykhata.user;
 
 
 import com.udayan.tallykhata.common.ApiResponse;
-import com.udayan.tallykhata.user.exp.InvalidDataException;
+import com.udayan.tallykhata.customexp.InvalidDataException;
 import com.udayan.tallykhata.user.mapper.UserMapper;
 import com.udayan.tallykhata.user.token.TokenService;
 import com.udayan.tallykhata.user.token.TokenType;
@@ -40,12 +40,12 @@ public class UserService {
 
     public ApiResponse changePassword(ChangePassword.ChangeUserPasswordRequest request, User user) throws InvalidDataException {
 
-        String oldPassword = request.getCurrentPassword()+user.getSalt();
+        String oldPassword = request.getOldPassword()+user.getSalt();
         if(!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new InvalidDataException("Current password is wrong");
+            throw new InvalidDataException("Old password is wrong");
         }
 
-        if(request.getCurrentPassword().equals(request.getPassword())){
+        if(request.getOldPassword().equals(request.getPassword())){
             throw new InvalidDataException("You used this password recently. Please choose a different one.");
         }
 

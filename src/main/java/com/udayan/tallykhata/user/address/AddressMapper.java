@@ -17,14 +17,12 @@ public class AddressMapper {
             address.setId(request.getId());
             address.setUpdatedDate(LocalDateTime.now());
         }
-        address.setHouseName(request.getHouseName());
-        address.setVillageName(request.getVillageName());
-        address.setRoadName(request.getRoadName());
+
         address.setCity(request.getCity());
         address.setState(request.getState());
         address.setCountry(request.getCountry());
         address.setPostCode(request.getPostCode());
-        address.setPostOffice(request.getPostOffice());
+        address.setAddressLine(request.getAddressLine());
         address.setUser(user);
         return address;
     }
@@ -40,14 +38,11 @@ public class AddressMapper {
     public AddressDTO.AddressResponse toAddressResponseDTO(Address address) {
         return AddressDTO.AddressResponse.builder()
                 .id(address.getId())
+                .addressLine(address.getAddressLine())
                 .city(address.getCity())
                 .state(address.getState())
                 .country(address.getCountry())
                 .postCode(address.getPostCode())
-                .postOffice(address.getPostOffice())
-                .roadName(address.getRoadName())
-                .houseName(address.getHouseName())
-                .villageName(address.getVillageName())
                 .build();
 
     }

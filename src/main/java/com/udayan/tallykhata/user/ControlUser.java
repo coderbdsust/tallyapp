@@ -10,27 +10,26 @@ public class ControlUser {
 
     @Data
     public static class revokeUserToken {
-        @Size(min = 4, max = 30, message = "Username length must be between 4 to 30")
-        @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "Username pattern is invalid")
+        @Size(min = 4, max = 50, message = "{username.size}")
+        @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "{username.pattern}")
         private String username;
     }
 
     @Data
     public static class LockUser {
-        @Size(min = 4, max = 30, message = "Username length must be between 4 to 30")
-        @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "Username pattern is invalid")
+        @Size(min = 4, max = 50, message = "{username.size}")
+        @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "{username.pattern}")
         private String username;
-        @NotNull(message = "Account lock value can't be empty")
+        @NotNull(message = "{accountlock.notempty}")
         private Boolean accountLocked;
-
     }
 
     @Data
     public static class changeUserRole {
-        @Size(min = 4, max = 30, message = "Username length must be between 4 to 30")
-        @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "Username pattern is invalid")
+        @Size(min = 4, max = 50, message = "{username.size}")
+        @Pattern(regexp = "^(?!.*[._]{2})[a-zA-Z0-9](?!.*[._]$)[a-zA-Z0-9._]{2,20}[a-zA-Z0-9]$",message = "{username.pattern}")
         private  String username;
-        @NotEmpty(message = "Role can't be empty")
+        @NotEmpty(message = "{role.notempty}")
         private String role;
     }
 }

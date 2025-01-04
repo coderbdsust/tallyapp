@@ -1,6 +1,7 @@
 package com.udayan.tallykhata.user.otp;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -15,5 +16,12 @@ public interface UserOTPRepository extends JpaRepository<UserOTP, UUID> {
       where t.user.id=:userId and t.otp=:otp and t.otpType = :otpType and t.isActive=true\s
       """)
     Optional<UserOTP> findActiveOTPByUserIdAndCode(UUID userId, String otp, int otpType);
+
+    @Modifying
+    @Query(value = """
+     UPDATE UserOTP t set t.isActive=false, t.updatedDate=CURRENT_TIMESTAMP
+     WHERE t.user.id=:userId and t.otpType = :otpType and t.isActive=true
+     """)
+    void revokeAllOTPByUserIDAndOtpType(UUID userId, int otpType);
 
 }

@@ -8,13 +8,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,5 +25,6 @@ public class Role extends BaseEntity {
     private String name;
     @ManyToMany(mappedBy = "roles")
     @JsonIgnore
+    @ToString.Exclude
     private List<User> user;
 }

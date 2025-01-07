@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error(convertToTitleCase(HttpStatus.UNAUTHORIZED))
-                .message(ex.getMessage())
+                .message("Wrong password")
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
                 .build();
@@ -163,7 +163,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(convertToTitleCase(HttpStatus.INTERNAL_SERVER_ERROR))
-                .message(convertToTitleCase(HttpStatus.INTERNAL_SERVER_ERROR))
+                .message("Something went wrong")
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
                 .build();

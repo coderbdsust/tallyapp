@@ -29,6 +29,13 @@ public class AuthenticationController {
         return ResponseEntity.ok().body(userRes);
     }
 
+    @PostMapping("/resend-account-verification-otp")
+    public ResponseEntity<ApiResponse> resendAccountVerificationOTP(@Valid @RequestBody AuthUser.ResendOTPRequest request) throws DuplicateKeyException, EmailSendingException {
+        log.info("resend-verification-otp {}",request);
+        ApiResponse response = authService.resendAccountVerificationOTP(request);
+        return ResponseEntity.ok().body(response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody Login.LoginRequest loginRequest) throws UserNotActiveException, UserAccountIsLocked {
         log.info("request for login {}", loginRequest.getUsername());

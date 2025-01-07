@@ -47,4 +47,11 @@ public class AuthUser {
         @Size(min = 6, max = 12, message = "{otpcode.size}")
         private String otpCode;
     }
+
+    @Data
+    public static class ResendOTPRequest {
+        @NotEmpty(message = "{username.notempty}")
+        @Size(min = 4, max = 50, message = "{username.size}")
+        private String username;
+    }
 }

@@ -96,6 +96,31 @@ public class AuthService {
         return userRequest;
     }
 
+    @Transactional
+    public ApiResponse resendAccountVerificationOTP(AuthUser.ResendOTPRequest request){
+        User user = userRepository.findByUsernameOrEmail(request.getUsername())
+                .orElseThrow(()->new InvalidDataException("No user found using this param"));
+
+        if(user.isEnabled()){
+            return ApiResponse.builder().sucs(true).message("User already verified")
+                    .businessCode(ApiResponse.BusinessCode.USER_ALREADY_VERIFIED.getValue())
+                    .userDetail(user.getEmail()).build();
+        }
+
+        userOTPRepository.revokeAllOTPByUserIDAndOtpType(user.getId(),OTPType.ACCOUNT_VERIFICATION.getName());
+
+        UserOTP otp = generateOTPForUserVerification(user);
+
+        sendAccountActivationEmail(user, otp);
+
+        return ApiResponse.builder()
+                .sucs(true)
+                .message("New OTP generated, Please check email")
+                .businessCode(ApiResponse.BusinessCode.USER_NOT_VERIFIED.getValue())
+                .userDetail(user.getEmail())
+                .build();
+    }
+
     private UserOTP generateOTPForUserVerification(User user) {
         UserOTP otp = new UserOTP();
         otp.setOtp(Utils.generateOTP(6));

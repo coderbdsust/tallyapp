@@ -37,9 +37,16 @@ public class AdminService {
     @Autowired
     private RoleRepository roleRepository;
 
-    public PageResponse<RegisteredUserResponse> getRegisteredUsers(int page, int size) {
+    public PageResponse<RegisteredUserResponse> getRegisteredUsers(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<User> users = userRepository.findAll(pageable);
+        Page<User> users;
+
+        if (search.length() > 3) {
+            users = userRepository.searchUsers(search, pageable);
+        } else {
+            users = userRepository.findAll(pageable);
+        }
+
         List<RegisteredUserResponse> regUsers = users.stream()
                 .map(userMapper::toRegisteredUserResponse)
                 .toList();

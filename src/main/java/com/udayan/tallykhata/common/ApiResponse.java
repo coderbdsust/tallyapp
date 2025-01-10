@@ -14,11 +14,10 @@ public class ApiResponse {
 
     @Getter
     public enum BusinessCode {
-        USER_ALREADY_VERIFIED(301), USER_NOT_VERIFIED(302);
+        USER_ALREADY_VERIFIED(601), USER_NOT_VERIFIED(602);
         final int value;
         BusinessCode(int value){
             this.value=value;
         }
-
     }
 }

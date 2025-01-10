@@ -7,9 +7,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
@@ -156,13 +158,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        log.debug("",ex);
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .message("You do not have permission to access this resource")
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handle(Exception ex,
                                          HttpServletRequest request, HttpServletResponse response) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(convertToTitleCase(HttpStatus.INTERNAL_SERVER_ERROR))
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                 .message("Something went wrong")
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())

@@ -26,9 +26,12 @@ public class AdminController {
     private AddressService addressService;
 
     @GetMapping("/registered/list")
-    public ResponseEntity<?> getRegisteredUsers(@RequestParam(name = "page", defaultValue = "0", required = false) int page, @RequestParam(name = "size", defaultValue = "10", required = false) int size){
-        log.debug("/users/admin/v1/registered/list - page {}, size {} ", page, size);
-        return ResponseEntity.ok(adminService.getRegisteredUsers(page, size));
+    public ResponseEntity<?> getRegisteredUsers(
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(name = "search", defaultValue = "", required = false) String search){
+        log.debug("/users/admin/v1/registered/list - page {}, size {}, search {} ", page, size, search);
+        return ResponseEntity.ok(adminService.getRegisteredUsers(page, size, search));
     }
 
     @PostMapping("/revoke/token")

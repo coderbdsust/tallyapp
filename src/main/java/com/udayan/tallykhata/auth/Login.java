@@ -25,7 +25,6 @@ public class Login {
 
     @Data
     public static class RefreshToken {
-        @NotEmpty(message = "{refreshtoken.notempty}")
         private String refreshToken;
     }
 }

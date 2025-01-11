@@ -3,6 +3,7 @@ package com.udayan.tallykhata.auth;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.udayan.tallykhata.user.deserializer.DateOfBirthDeserializer;
+import com.udayan.tallykhata.validator.EmailOrUsername;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -42,6 +43,7 @@ public class AuthUser {
     public static class VerifyUserRequest {
         @NotEmpty(message = "{username.notempty}")
         @Size(min = 4, max = 50, message = "{username.size}")
+        @EmailOrUsername
         private String username;
         @NotEmpty(message = "{otpcode.notempty}")
         @Size(min = 6, max = 12, message = "{otpcode.size}")
@@ -52,6 +54,7 @@ public class AuthUser {
     public static class ResendOTPRequest {
         @NotEmpty(message = "{username.notempty}")
         @Size(min = 4, max = 50, message = "{username.size}")
+        @EmailOrUsername
         private String username;
     }
 }

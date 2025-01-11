@@ -25,7 +25,8 @@ public class AppPropertyService {
         log.debug("page {}, size {}, search {} ", page, size, search);
         Pageable pageable = PageRequest.of(page, size, Sort.by(
                 Sort.Order.asc("createdDate"),
-                Sort.Order.asc("profile")
+                Sort.Order.asc("profile"),
+                Sort.Order.asc("appKey")
         ));
 
         Page<AppProperty> propertyList;

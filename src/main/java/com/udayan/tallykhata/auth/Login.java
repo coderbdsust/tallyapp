@@ -1,5 +1,6 @@
 package com.udayan.tallykhata.auth;
 
+import com.udayan.tallykhata.validator.EmailOrUsername;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ public class Login {
     public static class LoginRequest {
         @NotEmpty(message = "{usernameOrEmail.notempty}")
         @Size(min = 4, max = 50, message = "{usernameOrEmail.size}")
+        @EmailOrUsername
         private String username;
         @NotEmpty(message = "{password.notempty}")
         @Size(min = 8, max = 30, message = "{password.size}")

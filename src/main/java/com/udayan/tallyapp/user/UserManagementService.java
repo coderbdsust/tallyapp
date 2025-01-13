@@ -23,7 +23,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AdminService {
+public class UserManagementService {
 
     @Autowired
     private UserRepository userRepository;

@@ -1,7 +1,7 @@
-package com.udayan.tallykhata;
+package com.udayan.tallyapp;
 
-import com.udayan.tallykhata.user.role.Role;
-import com.udayan.tallykhata.user.role.RoleRepository;
+import com.udayan.tallyapp.user.role.Role;
+import com.udayan.tallyapp.user.role.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

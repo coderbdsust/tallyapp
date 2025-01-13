@@ -13,19 +13,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users/admin/v1")
+@RequestMapping("/admin/user-management/v1")
 @Slf4j
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminController {
+public class UserManagementController {
 
     @Autowired
-    private AdminService adminService;
+    private UserManagementService adminService;
 
     @Autowired
     private AddressService addressService;
 
-    @GetMapping("/registered/list")
+    @GetMapping("/registered-user/list")
     public ResponseEntity<?> getRegisteredUsers(
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/users/admin/v1")
+@RequestMapping("/admin/user-management/v1")
 @Slf4j
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")

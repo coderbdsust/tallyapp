@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.security.jwt;
+package com.udayan.tallyapp.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

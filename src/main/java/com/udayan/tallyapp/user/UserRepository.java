@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user;
+package com.udayan.tallyapp.user;
 
 
 import org.springframework.data.domain.Page;

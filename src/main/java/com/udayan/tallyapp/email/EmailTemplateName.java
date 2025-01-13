@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.email;
+package com.udayan.tallyapp.email;
 
 import lombok.Getter;
 

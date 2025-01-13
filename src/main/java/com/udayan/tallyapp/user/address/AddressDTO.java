@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user.address;
+package com.udayan.tallyapp.user.address;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;

@@ -1,11 +1,11 @@
-package com.udayan.tallykhata.auth;
+package com.udayan.tallyapp.auth;
 
-import com.udayan.tallykhata.customexp.InvalidTokenException;
-import com.udayan.tallykhata.security.jwt.JwtService;
-import com.udayan.tallykhata.user.User;
-import com.udayan.tallykhata.user.UserRepository;
-import com.udayan.tallykhata.user.token.TokenService;
-import com.udayan.tallykhata.user.token.TokenType;
+import com.udayan.tallyapp.customexp.InvalidTokenException;
+import com.udayan.tallyapp.security.jwt.JwtService;
+import com.udayan.tallyapp.user.User;
+import com.udayan.tallyapp.user.UserRepository;
+import com.udayan.tallyapp.user.token.TokenService;
+import com.udayan.tallyapp.user.token.TokenType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.security;
+package com.udayan.tallyapp.security;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

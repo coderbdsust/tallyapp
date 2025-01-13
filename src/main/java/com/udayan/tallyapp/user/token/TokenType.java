@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user.token;
+package com.udayan.tallyapp.user.token;
 
 import lombok.Getter;
 

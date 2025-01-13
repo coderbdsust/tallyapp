@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user.role;
+package com.udayan.tallyapp.user.role;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

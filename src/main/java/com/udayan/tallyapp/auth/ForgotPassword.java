@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.auth;
+package com.udayan.tallyapp.auth;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;

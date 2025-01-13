@@ -1,7 +1,7 @@
-package com.udayan.tallykhata.user.token;
+package com.udayan.tallyapp.user.token;
 
-import com.udayan.tallykhata.model.BaseEntity;
-import com.udayan.tallykhata.user.User;
+import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

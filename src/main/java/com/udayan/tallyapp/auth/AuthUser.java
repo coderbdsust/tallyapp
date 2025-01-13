@@ -1,9 +1,9 @@
-package com.udayan.tallykhata.auth;
+package com.udayan.tallyapp.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.udayan.tallykhata.user.deserializer.DateOfBirthDeserializer;
-import com.udayan.tallykhata.validator.EmailOrUsername;
+import com.udayan.tallyapp.user.deserializer.DateOfBirthDeserializer;
+import com.udayan.tallyapp.validator.EmailOrUsername;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 

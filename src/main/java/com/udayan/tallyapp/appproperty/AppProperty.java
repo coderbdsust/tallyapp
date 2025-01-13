@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.appproperty;
+package com.udayan.tallyapp.appproperty;
 
-import com.udayan.tallykhata.model.BaseEntity;
+import com.udayan.tallyapp.model.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;

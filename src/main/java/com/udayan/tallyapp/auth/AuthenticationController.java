@@ -1,8 +1,8 @@
-package com.udayan.tallykhata.auth;
+package com.udayan.tallyapp.auth;
 
 
-import com.udayan.tallykhata.customexp.*;
-import com.udayan.tallykhata.common.ApiResponse;
+import com.udayan.tallyapp.customexp.*;
+import com.udayan.tallyapp.common.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

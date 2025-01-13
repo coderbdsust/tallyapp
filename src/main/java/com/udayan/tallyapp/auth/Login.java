@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.auth;
+package com.udayan.tallyapp.auth;
 
-import com.udayan.tallykhata.validator.EmailOrUsername;
+import com.udayan.tallyapp.validator.EmailOrUsername;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;

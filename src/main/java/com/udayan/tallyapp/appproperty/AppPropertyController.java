@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.appproperty;
+package com.udayan.tallyapp.appproperty;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user.role;
+package com.udayan.tallyapp.user.role;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.user.address;
+package com.udayan.tallyapp.user.address;
 
-import com.udayan.tallykhata.user.User;
+import com.udayan.tallyapp.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

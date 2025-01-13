@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.security;
+package com.udayan.tallyapp.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

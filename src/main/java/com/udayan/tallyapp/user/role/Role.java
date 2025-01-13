@@ -1,9 +1,9 @@
-package com.udayan.tallykhata.user.role;
+package com.udayan.tallyapp.user.role;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.udayan.tallykhata.model.BaseEntity;
-import com.udayan.tallykhata.user.User;
+import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;

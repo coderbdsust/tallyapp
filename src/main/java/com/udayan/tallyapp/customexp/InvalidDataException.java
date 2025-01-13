@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.customexp;
+package com.udayan.tallyapp.customexp;
 
 public class InvalidDataException extends RuntimeException {
     public InvalidDataException(){

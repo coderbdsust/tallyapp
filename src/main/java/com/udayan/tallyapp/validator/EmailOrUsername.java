@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.validator;
+package com.udayan.tallyapp.validator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

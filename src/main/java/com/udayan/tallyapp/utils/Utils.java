@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.utils;
+package com.udayan.tallyapp.utils;
 
 import org.springframework.http.HttpStatus;
 

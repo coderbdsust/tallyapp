@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.security;
+package com.udayan.tallyapp.security;
 
-import com.udayan.tallykhata.user.User;
+import com.udayan.tallyapp.user.User;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;

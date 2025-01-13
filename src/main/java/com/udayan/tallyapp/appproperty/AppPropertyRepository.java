@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.appproperty;
+package com.udayan.tallyapp.appproperty;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

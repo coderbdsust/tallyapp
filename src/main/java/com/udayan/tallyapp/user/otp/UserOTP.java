@@ -1,8 +1,8 @@
-package com.udayan.tallykhata.user.otp;
+package com.udayan.tallyapp.user.otp;
 
 
-import com.udayan.tallykhata.model.BaseEntity;
-import com.udayan.tallykhata.user.User;
+import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;

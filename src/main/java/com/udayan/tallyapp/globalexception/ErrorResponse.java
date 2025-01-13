@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.globalexception;
+package com.udayan.tallyapp.globalexception;
 
 import lombok.Builder;
 import lombok.Data;

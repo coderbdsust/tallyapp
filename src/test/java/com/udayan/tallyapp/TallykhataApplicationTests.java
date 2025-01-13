@@ -1,4 +1,4 @@
-package com.udayan.tallykhata;
+package com.udayan.tallyapp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

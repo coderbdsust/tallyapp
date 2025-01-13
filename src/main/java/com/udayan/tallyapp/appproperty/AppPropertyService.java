@@ -1,8 +1,8 @@
-package com.udayan.tallykhata.appproperty;
+package com.udayan.tallyapp.appproperty;
 
-import com.udayan.tallykhata.common.PageResponse;
-import com.udayan.tallykhata.customexp.DuplicateKeyException;
-import com.udayan.tallykhata.customexp.InvalidDataException;
+import com.udayan.tallyapp.common.PageResponse;
+import com.udayan.tallyapp.customexp.DuplicateKeyException;
+import com.udayan.tallyapp.customexp.InvalidDataException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

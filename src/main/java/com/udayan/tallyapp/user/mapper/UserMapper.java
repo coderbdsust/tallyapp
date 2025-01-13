@@ -1,11 +1,11 @@
-package com.udayan.tallykhata.user.mapper;
+package com.udayan.tallyapp.user.mapper;
 
 
-import com.udayan.tallykhata.user.RegisteredUserResponse;
-import com.udayan.tallykhata.user.User;
-import com.udayan.tallykhata.user.address.Address;
-import com.udayan.tallykhata.user.address.AddressDTO;
-import com.udayan.tallykhata.user.address.AddressMapper;
+import com.udayan.tallyapp.user.RegisteredUserResponse;
+import com.udayan.tallyapp.user.User;
+import com.udayan.tallyapp.user.address.Address;
+import com.udayan.tallyapp.user.address.AddressDTO;
+import com.udayan.tallyapp.user.address.AddressMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

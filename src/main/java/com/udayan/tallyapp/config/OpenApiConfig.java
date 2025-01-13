@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.config;
+package com.udayan.tallyapp.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;

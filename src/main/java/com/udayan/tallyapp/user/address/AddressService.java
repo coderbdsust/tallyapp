@@ -1,7 +1,7 @@
-package com.udayan.tallykhata.user.address;
+package com.udayan.tallyapp.user.address;
 
-import com.udayan.tallykhata.user.User;
-import com.udayan.tallykhata.customexp.InvalidDataException;
+import com.udayan.tallyapp.user.User;
+import com.udayan.tallyapp.customexp.InvalidDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

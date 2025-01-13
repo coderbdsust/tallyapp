@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.common;
+package com.udayan.tallyapp.common;
 
 import lombok.*;
 

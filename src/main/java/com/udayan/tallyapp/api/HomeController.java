@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.api;
+package com.udayan.tallyapp.api;
 
-import com.udayan.tallykhata.dto.Greeting;
+import com.udayan.tallyapp.dto.Greeting;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

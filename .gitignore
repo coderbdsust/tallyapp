@@ -19,6 +19,7 @@ application-prod.properties
 *.iws
 *.iml
 *.ipr
+.DS_Store
 
 ### NetBeans ###
 /nbproject/private/

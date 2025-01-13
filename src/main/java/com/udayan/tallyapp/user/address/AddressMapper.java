@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.user.address;
+package com.udayan.tallyapp.user.address;
 
-import com.udayan.tallykhata.user.User;
+import com.udayan.tallyapp.user.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

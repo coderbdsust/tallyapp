@@ -1,10 +1,10 @@
-package com.udayan.tallykhata.user;
+package com.udayan.tallyapp.user;
 
 
-import com.udayan.tallykhata.model.BaseEntity;
-import com.udayan.tallykhata.user.address.Address;
-import com.udayan.tallykhata.user.role.Role;
-import com.udayan.tallykhata.user.token.Token;
+import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.user.address.Address;
+import com.udayan.tallyapp.user.role.Role;
+import com.udayan.tallyapp.user.token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

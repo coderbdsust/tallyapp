@@ -1,6 +1,6 @@
-package com.udayan.tallykhata.security.jwt;
+package com.udayan.tallyapp.security.jwt;
 
-import com.udayan.tallykhata.user.token.TokenService;
+import com.udayan.tallyapp.user.token.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

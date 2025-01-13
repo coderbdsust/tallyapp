@@ -1,7 +1,7 @@
-package com.udayan.tallykhata.security;
+package com.udayan.tallyapp.security;
 
 
-import com.udayan.tallykhata.security.jwt.JwtFilter;
+import com.udayan.tallyapp.security.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

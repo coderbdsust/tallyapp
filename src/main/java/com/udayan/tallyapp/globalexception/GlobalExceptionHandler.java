@@ -1,7 +1,7 @@
-package com.udayan.tallykhata.globalexception;
+package com.udayan.tallyapp.globalexception;
 
 
-import com.udayan.tallykhata.customexp.*;
+import com.udayan.tallyapp.customexp.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import static com.udayan.tallykhata.utils.Utils.convertToTitleCase;
+import static com.udayan.tallyapp.utils.Utils.convertToTitleCase;
 
 @RestControllerAdvice
 @Slf4j

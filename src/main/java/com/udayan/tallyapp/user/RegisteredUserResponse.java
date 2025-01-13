@@ -1,7 +1,7 @@
-package com.udayan.tallykhata.user;
+package com.udayan.tallyapp.user;
 
 
-import com.udayan.tallykhata.user.address.AddressDTO;
+import com.udayan.tallyapp.user.address.AddressDTO;
 import lombok.Builder;
 import lombok.Data;
 

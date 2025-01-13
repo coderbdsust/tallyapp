@@ -12,10 +12,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableAsync
-public class TallykhataApplication {
+public class TallyAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TallykhataApplication.class, args);
+		SpringApplication.run(TallyAppApplication.class, args);
 	}
 
 	@Bean

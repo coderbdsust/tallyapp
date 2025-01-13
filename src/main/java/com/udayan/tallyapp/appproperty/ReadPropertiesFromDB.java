@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.appproperty;
+package com.udayan.tallyapp.appproperty;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;

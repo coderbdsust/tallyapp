@@ -1,13 +1,13 @@
-package com.udayan.tallykhata.user;
+package com.udayan.tallyapp.user;
 
-import com.udayan.tallykhata.common.ApiResponse;
-import com.udayan.tallykhata.common.PageResponse;
-import com.udayan.tallykhata.customexp.InvalidDataException;
-import com.udayan.tallykhata.user.mapper.UserMapper;
-import com.udayan.tallykhata.user.role.Role;
-import com.udayan.tallykhata.user.role.RoleRepository;
-import com.udayan.tallykhata.user.token.TokenService;
-import com.udayan.tallykhata.user.token.TokenType;
+import com.udayan.tallyapp.common.ApiResponse;
+import com.udayan.tallyapp.common.PageResponse;
+import com.udayan.tallyapp.customexp.InvalidDataException;
+import com.udayan.tallyapp.user.mapper.UserMapper;
+import com.udayan.tallyapp.user.role.Role;
+import com.udayan.tallyapp.user.role.RoleRepository;
+import com.udayan.tallyapp.user.token.TokenService;
+import com.udayan.tallyapp.user.token.TokenType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

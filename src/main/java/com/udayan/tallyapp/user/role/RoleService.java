@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user.role;
+package com.udayan.tallyapp.user.role;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

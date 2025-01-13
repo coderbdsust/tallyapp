@@ -1,4 +1,4 @@
-package com.udayan.tallykhata.user.token;
+package com.udayan.tallyapp.user.token;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

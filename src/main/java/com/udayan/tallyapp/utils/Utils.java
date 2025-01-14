@@ -62,34 +62,11 @@ public class Utils {
         return Base64.getEncoder().encodeToString(keyBytes);
     }
 
-    public static String convertToTitleCase(HttpStatus status) {
-        String input = status.name();
-        // Split the string by underscores
-        String[] parts = input.split("_");
-
-        // Convert each part to title case and join them with spaces
-        StringBuilder result = new StringBuilder();
-        for (String part : parts) {
-            if (!part.isEmpty()) {
-                // Convert the first letter to uppercase and the rest to lowercase
-                result.append(part.substring(0, 1).toUpperCase())
-                        .append(part.substring(1).toLowerCase())
-                        .append(" ");
-            }
-        }
-        // Trim any trailing space and return
-        return result.toString().trim();
-    }
-
-
-
     public static void main(String[] args) {
         System.out.println(Utils.generateActivationCodeKey(50));
         System.out.println(Utils.generateOTP(6));
         System.out.println(generateSecretKey(64));
         System.out.println(generateSalt(32));
-        System.out.println(convertToTitleCase(HttpStatus.MULTI_STATUS));
         System.out.println(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-        System.out.println(convertToTitleCase(HttpStatus.BAD_REQUEST));
     }
 }

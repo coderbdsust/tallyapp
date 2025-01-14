@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import static com.udayan.tallyapp.utils.Utils.convertToTitleCase;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -30,7 +28,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(convertToTitleCase(HttpStatus.UNAUTHORIZED))
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -45,7 +43,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(convertToTitleCase(HttpStatus.UNAUTHORIZED))
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -60,7 +58,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(convertToTitleCase(HttpStatus.UNAUTHORIZED))
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message("Wrong password")
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -75,7 +73,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(convertToTitleCase(HttpStatus.UNAUTHORIZED))
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -90,7 +88,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(convertToTitleCase(HttpStatus.UNAUTHORIZED))
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -105,7 +103,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(convertToTitleCase(HttpStatus.BAD_REQUEST))
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -120,7 +118,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(convertToTitleCase(HttpStatus.BAD_REQUEST))
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -135,7 +133,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(convertToTitleCase(HttpStatus.BAD_REQUEST))
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
@@ -150,7 +148,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.EXPECTATION_FAILED.value())
-                .error(convertToTitleCase(HttpStatus.EXPECTATION_FAILED))
+                .error(HttpStatus.EXPECTATION_FAILED.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())

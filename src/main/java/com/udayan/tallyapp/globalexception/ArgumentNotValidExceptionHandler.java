@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import static com.udayan.tallyapp.utils.Utils.convertToTitleCase;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -39,7 +38,7 @@ public class ArgumentNotValidExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(convertToTitleCase(HttpStatus.BAD_REQUEST))
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message("Validation Error")
                 .errors(errorMapList)
                 .path(request.getRequestURI())

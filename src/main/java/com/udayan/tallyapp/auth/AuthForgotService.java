@@ -15,6 +15,7 @@ import com.udayan.tallyapp.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,9 @@ public class AuthForgotService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${application.account.password.reset.otp.expiration.minute}")
+    private long passwordResetOTPExpirationInMinute;
+
     @Transactional
     public ApiResponse sendForgotPasswordRequestByEmail(ForgotPassword.EmailRequest emailReq) throws InvalidDataException, EmailSendingException {
         User user = userRepository.findByEmail(emailReq.getEmail())
@@ -53,7 +57,7 @@ public class AuthForgotService {
     private UserOTP generateOTPForPasswordReset(User user, OTPType otpType) {
         UserOTP otp = new UserOTP();
         otp.setOtp(Utils.generateOTP(6));
-        otp.setExpiryTime(LocalDateTime.now().plusMinutes(60));
+        otp.setExpiryTime(LocalDateTime.now().plusMinutes(passwordResetOTPExpirationInMinute));
         otp.setIsUsed(false);
         otp.setIsActive(true);
         otp.setOtpType(otpType.getName());

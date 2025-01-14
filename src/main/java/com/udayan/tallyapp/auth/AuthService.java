@@ -62,6 +62,9 @@ public class AuthService {
     @Value("${application.mailing.activation-url}")
     private String accountActivationURL;
 
+    @Value("${application.account.verification.otp.expiration.minute}")
+    private long accountVerificationOTPExpirationMinute;
+
     @Transactional
     public AuthUser.UserRequest registerUser(AuthUser.UserRequest userRequest) throws DuplicateKeyException, EmailSendingException {
         Role userRole = roleRepository.findByName("USER").orElseThrow(() -> new IllegalStateException("Role 'USER' not initiated correctly"));
@@ -124,7 +127,7 @@ public class AuthService {
     private UserOTP generateOTPForUserVerification(User user) {
         UserOTP otp = new UserOTP();
         otp.setOtp(Utils.generateOTP(6));
-        otp.setExpiryTime(LocalDateTime.now().plusDays(2));
+        otp.setExpiryTime(LocalDateTime.now().plusMinutes(accountVerificationOTPExpirationMinute));
         otp.setIsUsed(false);
         otp.setIsActive(true);
         otp.setOtpType(OTPType.ACCOUNT_VERIFICATION.getName());

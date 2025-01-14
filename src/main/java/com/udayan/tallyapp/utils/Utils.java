@@ -89,7 +89,7 @@ public class Utils {
         System.out.println(generateSecretKey(64));
         System.out.println(generateSalt(32));
         System.out.println(convertToTitleCase(HttpStatus.MULTI_STATUS));
-        System.out.println(convertToTitleCase(HttpStatus.INTERNAL_SERVER_ERROR));
+        System.out.println(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         System.out.println(convertToTitleCase(HttpStatus.BAD_REQUEST));
     }
 }

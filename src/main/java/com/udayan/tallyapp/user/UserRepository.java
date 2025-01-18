@@ -14,7 +14,7 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-     @Query("SELECT u FROM User u WHERE u.enabled=true and (u.username = :param OR u.email = :param OR u.mobileNo = :param)")
+     @Query("SELECT u FROM User u WHERE u.username = :param OR u.email = :param OR u.mobileNo = :param")
      Optional<User> findByUsernameOrEmailOrMobileNo(@Param("param") String param);
      Optional<User> findByEmail(String email);
      Optional<User> findByUsername(String username);

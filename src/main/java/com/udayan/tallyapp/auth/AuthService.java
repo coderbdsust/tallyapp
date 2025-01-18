@@ -4,6 +4,7 @@ import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.email.EmailService;
 import com.udayan.tallyapp.email.EmailTemplateName;
+import com.udayan.tallyapp.redis.RedisTokenService;
 import com.udayan.tallyapp.security.jwt.JwtService;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
@@ -51,13 +52,16 @@ public class AuthService {
     private TokenService tokenService;
 
     @Autowired
-    private  JwtService jwtService;
+    private JwtService jwtService;
 
     @Autowired
-    private  AuthenticationManager authenticationManager;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    RedisTokenService redisTokenService;
 
     @Value("${application.mailing.activation-url}")
     private String accountActivationURL;
@@ -100,17 +104,17 @@ public class AuthService {
     }
 
     @Transactional
-    public ApiResponse resendAccountVerificationOTP(AuthUser.ResendOTPRequest request){
+    public ApiResponse resendAccountVerificationOTP(AuthUser.ResendOTPRequest request) {
         User user = userRepository.findByUsernameOrEmail(request.getUsername())
-                .orElseThrow(()->new InvalidDataException("No user found using this param"));
+                .orElseThrow(() -> new InvalidDataException("No user found using this param"));
 
-        if(user.isEnabled()){
+        if (user.isEnabled()) {
             return ApiResponse.builder().sucs(true).message("User already verified")
                     .businessCode(ApiResponse.BusinessCode.USER_ALREADY_VERIFIED.getValue())
                     .userDetail(user.getEmail()).build();
         }
 
-        userOTPRepository.revokeAllOTPByUserIDAndOtpType(user.getId(),OTPType.ACCOUNT_VERIFICATION.getName());
+        userOTPRepository.revokeAllOTPByUserIDAndOtpType(user.getId(), OTPType.ACCOUNT_VERIFICATION.getName());
 
         UserOTP otp = generateOTPForUserVerification(user);
 
@@ -167,7 +171,7 @@ public class AuthService {
     @Transactional
     public ApiResponse verifyUser(AuthUser.VerifyUserRequest user) throws InvalidDataException {
         User retrieveUser = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(()->new InvalidDataException("No Registered User Found For Verification"));
+                .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
 
         if (retrieveUser.isEnabled()) {
             return ApiResponse.builder()
@@ -177,7 +181,7 @@ public class AuthService {
         }
 
         UserOTP userOTP = userOTPRepository.findActiveOTPByUserIdAndCode(retrieveUser.getId(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName())
-                .orElseThrow(()->new InvalidDataException("Invalid OTP"));
+                .orElseThrow(() -> new InvalidDataException("Invalid OTP"));
 
         if (userOTP.getIsUsed()) {
             throw new InvalidDataException("OTP already used");
@@ -211,6 +215,7 @@ public class AuthService {
 
         return ApiResponse.builder()
                 .sucs(true)
+                .businessCode(ApiResponse.BusinessCode.OK.getValue())
                 .userDetail(user.getUsername())
                 .message("Successfully verified").build();
     }
@@ -239,13 +244,17 @@ public class AuthService {
         var claims = new HashMap<String, Object>();
         var user = ((User) auth.getPrincipal());
         claims.put("fullName", user.getFullName());
-        claims.put("email",user.getEmail());
+        claims.put("email", user.getEmail());
 
         var accessToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
         var refreshToken = jwtService.generateRefreshToken(claims, (User) auth.getPrincipal());
-        tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
+//         tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
+//        redisTokenService.deleteToken(user.getUsername(), TokenType.ACCESS_TOKEN);
+
         tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
-        tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
+        redisTokenService.saveToken(TokenType.ACCESS_TOKEN, accessToken, user.getUsername(), jwtService.jwtExpiration);
+
+        // tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
         tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
         return Login.LoginResponse.builder().
                 accessToken(accessToken)
@@ -277,14 +286,17 @@ public class AuthService {
         if (jwtService.isTokenValid(token.getRefreshToken(), user) && isTokenValid) {
             var claims = new HashMap<String, Object>();
             claims.put("fullName", user.getFullName());
-            claims.put("email",user.getEmail());
+            claims.put("email", user.getEmail());
 
             var accessToken = jwtService.generateToken(claims, user);
             var refreshToken = jwtService.generateRefreshToken(claims, user);
 
-            tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
+            // tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
+//            redisTokenService.deleteToken(user.getUsername(), TokenType.ACCESS_TOKEN);
+
             tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
-            tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
+            // tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
+            redisTokenService.saveToken(TokenType.ACCESS_TOKEN, accessToken, user.getUsername(), jwtService.jwtExpiration);
             tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
             return Login.LoginResponse.builder()
                     .accessToken(accessToken)

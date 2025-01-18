@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +24,10 @@ public class AuthenticationController {
     private AuthForgotService authForgotService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthUser.UserRequest> registerUser(@Valid @RequestBody AuthUser.UserRequest user) throws DuplicateKeyException, EmailSendingException {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody AuthUser.UserRequest user) throws DuplicateKeyException, EmailSendingException {
         log.info("request to register user {}",user);
         AuthUser.UserRequest userRes = authService.registerUser(user);
-        return ResponseEntity.ok().body(userRes);
+        return new ResponseEntity<>(userRes, HttpStatus.CREATED);
     }
 
     @PostMapping("/resend-account-verification-otp")
@@ -55,6 +56,7 @@ public class AuthenticationController {
         return ResponseEntity.ok().body(verifiedUser);
     }
 
+    @Deprecated
     @GetMapping("/verify")
     public ResponseEntity<ApiResponse> verifyUser(@RequestParam(required = true) @NotBlank @Size(min=4, max = 20) String username, @RequestParam(required = true) @NotBlank @Size(min=6, max = 8) String otpCode) throws InvalidDataException {
         log.info("request to verify username {}",username);
@@ -66,6 +68,13 @@ public class AuthenticationController {
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPassword.EmailRequest emailReq) throws InvalidDataException, EmailSendingException {
         log.info("request to forgot password by email {}",emailReq);
         ApiResponse res = authForgotService.sendForgotPasswordRequestByEmail(emailReq);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @PostMapping("/forgot-password-otp-validity")
+    public ResponseEntity<?> forgotPasswordOtpValidity(@Valid @RequestBody ForgotPassword.OtpRequest otpRequest) throws InvalidDataException, EmailSendingException {
+        log.info("request to forgot-password-otp-validity by email {}",otpRequest.getEmail());
+        ApiResponse res = authForgotService.forgotPasswordOtpValidity(otpRequest);
         return ResponseEntity.ok().body(res);
     }
 

@@ -1,0 +1,32 @@
+package com.udayan.tallyapp.redis;
+
+import com.udayan.tallyapp.user.token.TokenType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+
+@Service
+public class RedisTokenService {
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    public void saveToken(TokenType tokenType, String token, String username, long expirationInMilliSeconds) {
+        String key = tokenType+"_"+username;
+        redisTemplate.opsForValue().set( key, token, Duration.ofMillis(expirationInMilliSeconds));
+    }
+
+    public void deleteToken(String username, TokenType tokenType) {
+        String key = tokenType+"_"+username;
+        redisTemplate.delete(key);
+    }
+
+    public boolean isTokenValid(String username, TokenType tokenType, String tokenData) {
+        String key = tokenType+"_"+username;
+        String token = (String) redisTemplate.opsForValue().get(key);
+        return tokenData.equals(token);
+    }
+
+}

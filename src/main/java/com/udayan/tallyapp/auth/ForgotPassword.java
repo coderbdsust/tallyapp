@@ -1,5 +1,6 @@
 package com.udayan.tallyapp.auth;
 
+import com.udayan.tallyapp.validator.EmailOrUsername;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -8,10 +9,20 @@ public class ForgotPassword {
 
     @Data
     public static class EmailRequest {
-        @Email(message = "{email.notvalid}")
         @NotEmpty(message = "{email.notempty}")
         @NotNull(message = "{email.notempty}")
+        @EmailOrUsername
         private String email;
+    }
+
+    @Data
+    public static class OtpRequest {
+        @NotEmpty(message = "{email.notempty}")
+        @NotNull(message = "{email.notempty}")
+        @EmailOrUsername
+        private String email;
+        @Size(min = 6, max = 6, message = "{otpcode.size}")
+        private String otpCode;
     }
 
     @Data
@@ -27,7 +38,7 @@ public class ForgotPassword {
     @Builder
     public static class ResetPassword {
         @NotEmpty(message = "{email.notempty}")
-        @Email(message = "{email.notvalid}")
+        @EmailOrUsername
         String email;
         @Size(min = 6, max = 6, message = "{otpcode.size}")
         private String otpCode;

@@ -1,6 +1,7 @@
 package com.udayan.tallyapp.auth;
 
 import com.udayan.tallyapp.customexp.InvalidTokenException;
+import com.udayan.tallyapp.redis.RedisTokenService;
 import com.udayan.tallyapp.security.jwt.JwtService;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
@@ -23,6 +24,7 @@ public class LogoutHandlerService implements LogoutHandler {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final RedisTokenService redisTokenService;
 
     @Override
     public void logout(
@@ -52,6 +54,8 @@ public class LogoutHandlerService implements LogoutHandler {
         if (user != null) {
             tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
             tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
+            redisTokenService.deleteToken(user.getUsername(), TokenType.ACCESS_TOKEN);
+
             SecurityContextHolder.clearContext();
         }
     }

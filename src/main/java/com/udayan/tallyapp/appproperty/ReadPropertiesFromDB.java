@@ -44,12 +44,11 @@ public class ReadPropertiesFromDB implements EnvironmentPostProcessor, Applicati
 
             String currentProfile = null;
 
-            if (profiles.length == 0) {
+            if (profiles.length < 1) {
                 log.info("Setting profile : dev");
                 currentProfile = "dev";
-            }
-
-            currentProfile = profiles[0];
+            }else
+                currentProfile = profiles[0];
 
             log.info("Current active profile : " + currentProfile);
 

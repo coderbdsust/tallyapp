@@ -3,6 +3,7 @@ package com.udayan.tallyapp.user;
 import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.common.PageResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
+import com.udayan.tallyapp.redis.RedisTokenService;
 import com.udayan.tallyapp.user.mapper.UserMapper;
 import com.udayan.tallyapp.user.role.Role;
 import com.udayan.tallyapp.user.role.RoleRepository;
@@ -37,6 +38,9 @@ public class UserManagementService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    RedisTokenService redisTokenService;
+
     public PageResponse<RegisteredUserResponse> getRegisteredUsers(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<User> users;
@@ -66,6 +70,7 @@ public class UserManagementService {
                 .orElseThrow(() -> new InvalidDataException("No user found with the username"));
         tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
         tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
+        redisTokenService.deleteToken(user.getUsername(), TokenType.ACCESS_TOKEN);
         return ApiResponse.builder()
                 .sucs(true)
                 .message("User all token revoked successfully")

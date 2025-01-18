@@ -39,7 +39,7 @@ public class ArgumentNotValidExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation Error")
+                .message("Validation Failed")
                 .errors(errorMapList)
                 .path(request.getRequestURI())
                 .build();

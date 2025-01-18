@@ -47,7 +47,7 @@ public class AuthForgotService {
 
     @Transactional
     public ApiResponse sendForgotPasswordRequestByEmail(ForgotPassword.EmailRequest emailReq) throws InvalidDataException, EmailSendingException {
-        User user = userRepository.findByEmail(emailReq.getEmail())
+        User user = userRepository.findByUsernameOrEmail(emailReq.getEmail())
                 .orElseThrow(()->new InvalidDataException("No user found using this email"));
         userOTPRepository.revokeAllOTPByUserIDAndOtpType(user.getId(), OTPType.PASSWORD_RESET.getName());
         UserOTP otp  = generateOTPForPasswordReset(user, OTPType.PASSWORD_RESET);
@@ -83,6 +83,7 @@ public class AuthForgotService {
             return ApiResponse.builder()
                     .sucs(true)
                     .userDetail(user.getEmail())
+                    .businessCode(ApiResponse.BusinessCode.OK.getValue())
                     .message("OTP is send successfully for reset password")
                     .build();
         } catch (Exception e) {
@@ -97,8 +98,8 @@ public class AuthForgotService {
             throw new InvalidDataException("Password and Confirm Password didn't matched");
         }
 
-        User user = userRepository.findByEmail(resetPassword.getEmail())
-                .orElseThrow(()->new InvalidDataException("No user found using email"));
+        User user = userRepository.findByUsernameOrEmail(resetPassword.getEmail())
+                .orElseThrow(()->new InvalidDataException("No user found using email or username"));
 
 
         String saltedPassword = resetPassword.getPassword()+user.getSalt();
@@ -139,8 +140,28 @@ public class AuthForgotService {
         return ApiResponse.builder()
                 .sucs(true)
                 .userDetail(user.getUsername())
+                .businessCode(ApiResponse.BusinessCode.OK.getValue())
                 .message("Password reset successfully")
                 .build();
 
+    }
+
+    public ApiResponse forgotPasswordOtpValidity(ForgotPassword.OtpRequest otpRequest) {
+        User user = userRepository.findByUsernameOrEmail(otpRequest.getEmail())
+                .orElseThrow(()->new InvalidDataException("No user found using this email or username"));
+
+        UserOTP otp = userOTPRepository.findActiveOTPByUserIdAndCode(user.getId(), otpRequest.getOtpCode(), OTPType.PASSWORD_RESET.getName())
+                .orElseThrow(()->new InvalidDataException("Invalid OTP for Password Reset"));
+
+        if(LocalDateTime.now().isAfter(otp.getExpiryTime())){
+            throw new InvalidDataException("OTP already expired");
+        }
+
+        return ApiResponse.builder()
+                .sucs(true)
+                .businessCode(ApiResponse.BusinessCode.OK.getValue())
+                .userDetail(user.getEmail())
+                .message("OTP is valid")
+                .build();
     }
 }

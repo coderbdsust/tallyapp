@@ -1,6 +1,7 @@
 package com.udayan.tallyapp.security.jwt;
 
-import com.udayan.tallyapp.user.token.TokenService;
+import com.udayan.tallyapp.redis.RedisTokenService;
+import com.udayan.tallyapp.user.token.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
-    private final TokenService tokenService;
+    private final RedisTokenService redisTokenService;
 
     @Override
     protected void doFilterInternal(
@@ -68,7 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            boolean isTokenValid = tokenService.isTokenValid(accessToken);
+            boolean isTokenValid = redisTokenService.isTokenValid(username, TokenType.ACCESS_TOKEN, accessToken);
 
             if (jwtService.isTokenValid(accessToken, userDetails) && isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

@@ -65,8 +65,8 @@ public class UserManagementService {
         );
     }
 
-    public ApiResponse revokeToken(ControlUser.revokeUserToken request) throws InvalidDataException {
-        User user = userRepository.findByUsername(request.getUsername())
+    public ApiResponse revokeToken(ControlUser.RevokeUserToken request) throws InvalidDataException {
+        User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new InvalidDataException("No user found with the username"));
         tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
         tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
@@ -78,13 +78,13 @@ public class UserManagementService {
                 .build();
     }
 
-    public ApiResponse changeUserRole(ControlUser.changeUserRole request, User currentUser) throws InvalidDataException {
+    public ApiResponse changeUserRole(ControlUser.ChangeUserRole request, User currentUser) throws InvalidDataException {
 
         if (request.getUsername().equals(currentUser.getUsername())) {
             throw new InvalidDataException("You can't changed your own role");
         }
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new InvalidDataException("No user found with the username"));
 
         Role role = roleRepository.findByName(request.getRole())
@@ -117,7 +117,7 @@ public class UserManagementService {
             throw new InvalidDataException("You can't lock your own account");
         }
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new InvalidDataException("No user found with the username"));
 
         user.setAccountLocked(request.getAccountLocked());

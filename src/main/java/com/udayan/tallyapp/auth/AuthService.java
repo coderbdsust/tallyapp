@@ -1,10 +1,12 @@
 package com.udayan.tallyapp.auth;
 
-import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.common.ApiResponse;
+import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.email.EmailService;
 import com.udayan.tallyapp.email.EmailTemplateName;
+import com.udayan.tallyapp.redis.RedisRateLimitService;
 import com.udayan.tallyapp.redis.RedisTokenService;
+import com.udayan.tallyapp.redis.exp.TooManyRequestException;
 import com.udayan.tallyapp.security.jwt.JwtService;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
@@ -63,6 +65,9 @@ public class AuthService {
     @Autowired
     RedisTokenService redisTokenService;
 
+    @Autowired
+    RedisRateLimitService redisRateLimitService;
+
     @Value("${application.mailing.activation-url}")
     private String accountActivationURL;
 
@@ -105,6 +110,11 @@ public class AuthService {
 
     @Transactional
     public ApiResponse resendAccountVerificationOTP(AuthUser.ResendOTPRequest request) {
+
+        if(!redisRateLimitService.isResendAccountVerificationOTPAllowed(request.getUsername())) {
+            throw new TooManyRequestException("Too many request, Please wait and try later");
+        }
+
         User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new InvalidDataException("No user found using this param"));
 
@@ -170,6 +180,11 @@ public class AuthService {
 
     @Transactional
     public ApiResponse verifyUser(AuthUser.VerifyUserRequest user) throws InvalidDataException {
+
+        if(!redisRateLimitService.isVerifyUserAllowed(user.getUsername())) {
+            throw new TooManyRequestException("Too many request, Please wait and try later");
+        }
+
         User retrieveUser = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
 

@@ -35,13 +35,13 @@ public class UserManagementController {
     }
 
     @PostMapping("/revoke/token")
-    public ResponseEntity<?> revokeUserToken(@Valid @RequestBody ControlUser.revokeUserToken request) throws InvalidDataException {
+    public ResponseEntity<?> revokeUserToken(@Valid @RequestBody ControlUser.RevokeUserToken request) throws InvalidDataException {
         log.debug("/users/admin/v1/revoke/token - {} ", request);
         return ResponseEntity.ok(adminService.revokeToken(request));
     }
 
     @PostMapping("/change/role")
-    public ResponseEntity<?> changeUserRole(@Valid @RequestBody ControlUser.changeUserRole request) throws InvalidDataException {
+    public ResponseEntity<?> changeUserRole(@Valid @RequestBody ControlUser.ChangeUserRole request) throws InvalidDataException {
         log.debug("/users/admin/v1/change/role - {} ", request);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();

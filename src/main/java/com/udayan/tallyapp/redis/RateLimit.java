@@ -1,0 +1,9 @@
+package com.udayan.tallyapp.redis;
+
+public enum RateLimit {
+    VERIFY_USER,
+    RESEND_ACCOUNT_VERIFICATION_OTP,
+    FORGOT_PASSWORD_OTP_GENERATION,
+    PASSWORD_RESET_REQUEST,
+    FORGOT_PASSWORD_OTP_VALIDITY
+}

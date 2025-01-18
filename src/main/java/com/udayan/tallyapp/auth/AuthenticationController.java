@@ -3,6 +3,7 @@ package com.udayan.tallyapp.auth;
 
 import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.common.ApiResponse;
+import com.udayan.tallyapp.redis.RedisRateLimitService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,6 +23,9 @@ public class AuthenticationController {
 
     @Autowired
     private AuthForgotService authForgotService;
+
+    @Autowired
+    RedisRateLimitService redisRateLimitService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody AuthUser.UserRequest user) throws DuplicateKeyException, EmailSendingException {

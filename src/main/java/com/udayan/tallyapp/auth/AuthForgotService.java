@@ -5,6 +5,8 @@ import com.udayan.tallyapp.customexp.EmailSendingException;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.email.EmailService;
 import com.udayan.tallyapp.email.EmailTemplateName;
+import com.udayan.tallyapp.redis.RedisRateLimitService;
+import com.udayan.tallyapp.redis.exp.TooManyRequestException;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
 import com.udayan.tallyapp.user.mapper.UserMapper;
@@ -42,15 +44,22 @@ public class AuthForgotService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    RedisRateLimitService redisRateLimitService;
+
     @Value("${application.account.password.reset.otp.expiration.minute}")
     private long passwordResetOTPExpirationInMinute;
 
     @Transactional
     public ApiResponse sendForgotPasswordRequestByEmail(ForgotPassword.EmailRequest emailReq) throws InvalidDataException, EmailSendingException {
+        if (!redisRateLimitService.isForgotPasswordOTPGenerateAllowed(emailReq.getEmail())) {
+            throw new TooManyRequestException("Too many request, Please wait and Try later");
+        }
+
         User user = userRepository.findByUsernameOrEmail(emailReq.getEmail())
-                .orElseThrow(()->new InvalidDataException("No user found using this email"));
+                .orElseThrow(() -> new InvalidDataException("No user found using this email"));
         userOTPRepository.revokeAllOTPByUserIDAndOtpType(user.getId(), OTPType.PASSWORD_RESET.getName());
-        UserOTP otp  = generateOTPForPasswordReset(user, OTPType.PASSWORD_RESET);
+        UserOTP otp = generateOTPForPasswordReset(user, OTPType.PASSWORD_RESET);
         return sendOTPForResetPasswordEmail(user, otp);
     }
 
@@ -94,23 +103,27 @@ public class AuthForgotService {
 
     public ApiResponse resetPassword(ForgotPassword.ResetPassword resetPassword) throws InvalidDataException {
 
+        if (!redisRateLimitService.isPasswordResetRequestAllowed(resetPassword.getEmail())) {
+            throw new TooManyRequestException("Too many request, Please wait and Try later");
+        }
+
         if (!resetPassword.getPassword().matches(resetPassword.getConfirmPassword())) {
             throw new InvalidDataException("Password and Confirm Password didn't matched");
         }
 
         User user = userRepository.findByUsernameOrEmail(resetPassword.getEmail())
-                .orElseThrow(()->new InvalidDataException("No user found using email or username"));
+                .orElseThrow(() -> new InvalidDataException("No user found using email or username"));
 
 
-        String saltedPassword = resetPassword.getPassword()+user.getSalt();
-        if(passwordEncoder.matches(saltedPassword, user.getPassword())){
+        String saltedPassword = resetPassword.getPassword() + user.getSalt();
+        if (passwordEncoder.matches(saltedPassword, user.getPassword())) {
             throw new InvalidDataException("You used this password recently. Please choose a different one.");
         }
 
         UserOTP otp = userOTPRepository.findActiveOTPByUserIdAndCode(user.getId(), resetPassword.getOtpCode(), OTPType.PASSWORD_RESET.getName())
-                .orElseThrow(()->new InvalidDataException("Invalid OTP for Password Reset"));
+                .orElseThrow(() -> new InvalidDataException("Invalid OTP for Password Reset"));
 
-        if(LocalDateTime.now().isAfter(otp.getExpiryTime())){
+        if (LocalDateTime.now().isAfter(otp.getExpiryTime())) {
             throw new InvalidDataException("OTP already expired");
         }
 
@@ -147,13 +160,18 @@ public class AuthForgotService {
     }
 
     public ApiResponse forgotPasswordOtpValidity(ForgotPassword.OtpRequest otpRequest) {
+
+        if (!redisRateLimitService.isForgotPasswordOTPValidityAllowed(otpRequest.getEmail())) {
+            throw new TooManyRequestException("Too many request, Please wait and Try later");
+        }
+
         User user = userRepository.findByUsernameOrEmail(otpRequest.getEmail())
-                .orElseThrow(()->new InvalidDataException("No user found using this email or username"));
+                .orElseThrow(() -> new InvalidDataException("No user found using this email or username"));
 
         UserOTP otp = userOTPRepository.findActiveOTPByUserIdAndCode(user.getId(), otpRequest.getOtpCode(), OTPType.PASSWORD_RESET.getName())
-                .orElseThrow(()->new InvalidDataException("Invalid OTP for Password Reset"));
+                .orElseThrow(() -> new InvalidDataException("Invalid OTP for Password Reset"));
 
-        if(LocalDateTime.now().isAfter(otp.getExpiryTime())){
+        if (LocalDateTime.now().isAfter(otp.getExpiryTime())) {
             throw new InvalidDataException("OTP already expired");
         }
 

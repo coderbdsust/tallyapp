@@ -20,8 +20,6 @@ public class UserMapper {
     AddressMapper addressMapper;
 
     public RegisteredUserResponse toRegisteredUserResponse(User user){
-        log.debug("toRegisteredUserResponse");
-
         List<Address> addressList = user.getAddresses();
         List<AddressDTO.AddressResponse> addressResponseList = addressMapper.addressToAddressResponseList(addressList);
 

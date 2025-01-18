@@ -2,6 +2,7 @@ package com.udayan.tallyapp.globalexception;
 
 
 import com.udayan.tallyapp.customexp.*;
+import com.udayan.tallyapp.redis.exp.TooManyRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -129,6 +130,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             InvalidDataException.class})
     public ResponseEntity<?> badRequest(InvalidDataException ex, HttpServletRequest request) {
+        log.error("",ex);
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler({
+            TooManyRequestException.class})
+    public ResponseEntity<?> badRequest(TooManyRequestException ex, HttpServletRequest request) {
         log.error("",ex);
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

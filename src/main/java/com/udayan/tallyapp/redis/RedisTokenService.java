@@ -14,17 +14,17 @@ public class RedisTokenService {
     private RedisTemplate<String, Object> redisTemplate;
 
     public void saveToken(TokenType tokenType, String token, String username, long expirationInMilliSeconds) {
-        String key = tokenType+"_"+username;
+        String key = tokenType+":"+username;
         redisTemplate.opsForValue().set( key, token, Duration.ofMillis(expirationInMilliSeconds));
     }
 
     public void deleteToken(String username, TokenType tokenType) {
-        String key = tokenType+"_"+username;
+        String key = tokenType+":"+username;
         redisTemplate.delete(key);
     }
 
     public boolean isTokenValid(String username, TokenType tokenType, String tokenData) {
-        String key = tokenType+"_"+username;
+        String key = tokenType+":"+username;
         String token = (String) redisTemplate.opsForValue().get(key);
         return tokenData.equals(token);
     }

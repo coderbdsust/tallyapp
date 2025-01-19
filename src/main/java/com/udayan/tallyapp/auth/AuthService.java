@@ -143,7 +143,6 @@ public class AuthService {
         otp.setOtp(Utils.generateOTP(6));
         otp.setExpiryTime(LocalDateTime.now().plusMinutes(accountVerificationOTPExpirationMinute));
         otp.setIsUsed(false);
-        otp.setIsActive(true);
         otp.setOtpType(OTPType.ACCOUNT_VERIFICATION.getName());
         otp.setUser(user);
         UserOTP saveOtp = userOTPRepository.save(otp);
@@ -185,17 +184,17 @@ public class AuthService {
             throw new TooManyRequestException("Too many request, Please wait and try later");
         }
 
-        User retrieveUser = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
+//        User retrieveUser = userRepository.findByUsername(user.getUsername())
+//                .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
+//
+//        if (retrieveUser.isEnabled()) {
+//            return ApiResponse.builder()
+//                    .sucs(true)
+//                    .userDetail(retrieveUser.getUsername())
+//                    .message("User already verified").build();
+//        }
 
-        if (retrieveUser.isEnabled()) {
-            return ApiResponse.builder()
-                    .sucs(true)
-                    .userDetail(retrieveUser.getUsername())
-                    .message("User already verified").build();
-        }
-
-        UserOTP userOTP = userOTPRepository.findActiveOTPByUserIdAndCode(retrieveUser.getId(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName())
+        UserOTP userOTP = userOTPRepository.findActiveOTPByUserParamAndCode(user.getUsername(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName())
                 .orElseThrow(() -> new InvalidDataException("Invalid OTP"));
 
         if (userOTP.getIsUsed()) {
@@ -203,15 +202,16 @@ public class AuthService {
         }
 
         if (LocalDateTime.now().isAfter(userOTP.getExpiryTime())) {
-            generateOTPForUserVerification(retrieveUser);
-            throw new InvalidDataException("Expired OTP, New OTP Generated");
+            throw new InvalidDataException("OTP already expired");
         }
 
         userOTP.setIsUsed(true);
-        userOTP.setIsActive(false);
         userOTP.setValidatedTime(LocalDateTime.now());
         userOTP.setUpdatedDate(LocalDateTime.now());
         userOTPRepository.save(userOTP);
+
+        User retrieveUser = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
 
         retrieveUser.setEnabled(true);
         retrieveUser.setUpdatedDate(LocalDateTime.now());
@@ -263,14 +263,12 @@ public class AuthService {
 
         var accessToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
         var refreshToken = jwtService.generateRefreshToken(claims, (User) auth.getPrincipal());
-//         tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
-//        redisTokenService.deleteToken(user.getUsername(), TokenType.ACCESS_TOKEN);
 
         tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
-        redisTokenService.saveToken(TokenType.ACCESS_TOKEN, accessToken, user.getUsername(), jwtService.jwtExpiration);
-
-        // tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
         tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
+        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration);
+        // tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
+
         return Login.LoginResponse.builder().
                 accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -306,13 +304,10 @@ public class AuthService {
             var accessToken = jwtService.generateToken(claims, user);
             var refreshToken = jwtService.generateRefreshToken(claims, user);
 
-            // tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
-//            redisTokenService.deleteToken(user.getUsername(), TokenType.ACCESS_TOKEN);
-
             tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
-            // tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
-            redisTokenService.saveToken(TokenType.ACCESS_TOKEN, accessToken, user.getUsername(), jwtService.jwtExpiration);
             tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
+            redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration);
+
             return Login.LoginResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)

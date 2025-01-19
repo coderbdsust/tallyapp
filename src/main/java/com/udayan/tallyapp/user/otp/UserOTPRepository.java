@@ -12,15 +12,21 @@ import java.util.UUID;
 public interface UserOTPRepository extends JpaRepository<UserOTP, UUID> {
 
     @Query(value = """
-      select t from UserOTP t\s
-      where t.user.id=:userId and t.otp=:otp and t.otpType = :otpType and t.isActive=true\s
+      select t from UserOTP t
+      where (t.user.username=:param or t.user.email=:param) and t.otp=:otp and t.otpType = :otpType and t.isUsed=false
+      """)
+    Optional<UserOTP> findActiveOTPByUserParamAndCode(String param, String otp, int otpType);
+
+    @Query(value = """
+      select t from UserOTP t
+      where t.user.id=:userId and t.otp=:otp and t.otpType = :otpType and t.isUsed=false
       """)
     Optional<UserOTP> findActiveOTPByUserIdAndCode(UUID userId, String otp, int otpType);
 
     @Modifying
     @Query(value = """
-     UPDATE UserOTP t set t.isActive=false, t.updatedDate=CURRENT_TIMESTAMP
-     WHERE t.user.id=:userId and t.otpType = :otpType and t.isActive=true
+     UPDATE UserOTP t set t.isUsed=true, t.updatedDate=CURRENT_TIMESTAMP
+     WHERE t.user.id=:userId and t.otpType = :otpType and t.isUsed=false
      """)
     void revokeAllOTPByUserIDAndOtpType(UUID userId, int otpType);
 

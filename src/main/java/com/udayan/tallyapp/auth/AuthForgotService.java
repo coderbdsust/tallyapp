@@ -68,7 +68,6 @@ public class AuthForgotService {
         otp.setOtp(Utils.generateOTP(6));
         otp.setExpiryTime(LocalDateTime.now().plusMinutes(passwordResetOTPExpirationInMinute));
         otp.setIsUsed(false);
-        otp.setIsActive(true);
         otp.setOtpType(otpType.getName());
         otp.setUser(user);
         UserOTP saveOtp = userOTPRepository.save(otp);
@@ -127,7 +126,6 @@ public class AuthForgotService {
             throw new InvalidDataException("OTP already expired");
         }
 
-        otp.setIsActive(false);
         otp.setIsUsed(true);
         otp.setUpdatedDate(LocalDateTime.now());
         otp.setValidatedTime(LocalDateTime.now());

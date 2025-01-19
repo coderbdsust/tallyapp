@@ -144,17 +144,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             TooManyRequestException.class})
-    public ResponseEntity<?> badRequest(TooManyRequestException ex, HttpServletRequest request) {
+    public ResponseEntity<?> tooManyRequest(TooManyRequestException ex, HttpServletRequest request) {
         log.error("",ex);
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                .error(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(new ArrayList<>())
                 .path(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
     }
 
     @ExceptionHandler({

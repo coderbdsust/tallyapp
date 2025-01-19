@@ -22,7 +22,6 @@ public class UserOTP extends BaseEntity {
     private String otp;
     private Boolean isSend=false;
     private Boolean isUsed=false;
-    private Boolean isActive=true;
     private int otpType;
     private LocalDateTime expiryTime;
     private LocalDateTime validatedTime;

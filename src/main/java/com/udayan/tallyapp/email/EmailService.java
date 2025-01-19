@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
+    @Value("${spring.mail.username}")
+    private String emailFrom;
 
     @Async
     public void sendEmailForActivateAccount(
@@ -56,7 +59,7 @@ public class EmailService {
         Context context = new Context();
         context.setVariables(properties);
 
-        helper.setFrom("no.reply.tallykhata@gmail.com");
+        helper.setFrom(emailFrom);
         helper.setTo(to);
         helper.setSubject(subject);
 
@@ -96,7 +99,7 @@ public class EmailService {
         Context context = new Context();
         context.setVariables(properties);
 
-        helper.setFrom("no.reply.tallykhata@gmail.com");
+        helper.setFrom(emailFrom);
         helper.setTo(to);
         helper.setSubject(subject);
 
@@ -134,7 +137,7 @@ public class EmailService {
         Context context = new Context();
         context.setVariables(properties);
 
-        helper.setFrom("no.reply.tallykhata@gmail.com");
+        helper.setFrom(emailFrom);
         helper.setTo(to);
         helper.setSubject(subject);
 

@@ -13,7 +13,7 @@ public class RedisTokenService {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public void saveToken(TokenType tokenType, String token, String username, long expirationInMilliSeconds) {
+    public void saveToken(String username, TokenType tokenType, String token, long expirationInMilliSeconds) {
         String key = tokenType+":"+username;
         redisTemplate.opsForValue().set( key, token, Duration.ofMillis(expirationInMilliSeconds));
     }

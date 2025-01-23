@@ -143,6 +143,7 @@ public class AuthService {
         otp.setOtp(Utils.generateOTP(6));
         otp.setExpiryTime(LocalDateTime.now().plusMinutes(accountVerificationOTPExpirationMinute));
         otp.setIsUsed(false);
+        otp.setIsActive(true);
         otp.setOtpType(OTPType.ACCOUNT_VERIFICATION.getName());
         otp.setUser(user);
         UserOTP saveOtp = userOTPRepository.save(otp);
@@ -206,6 +207,7 @@ public class AuthService {
         }
 
         userOTP.setIsUsed(true);
+        userOTP.setIsActive(false);
         userOTP.setValidatedTime(LocalDateTime.now());
         userOTP.setUpdatedDate(LocalDateTime.now());
         userOTPRepository.save(userOTP);

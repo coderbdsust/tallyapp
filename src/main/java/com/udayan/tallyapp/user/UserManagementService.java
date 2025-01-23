@@ -41,7 +41,7 @@ public class UserManagementService {
     @Autowired
     RedisTokenService redisTokenService;
 
-    public PageResponse<RegisteredUserResponse> getRegisteredUsers(int page, int size, String search) {
+    public PageResponse<UserDTO.RegisteredUserResponse> getRegisteredUsers(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<User> users;
 
@@ -51,7 +51,7 @@ public class UserManagementService {
             users = userRepository.findAll(pageable);
         }
 
-        List<RegisteredUserResponse> regUsers = users.stream()
+        List<UserDTO.RegisteredUserResponse> regUsers = users.stream()
                 .map(userMapper::toRegisteredUserResponse)
                 .toList();
         return new PageResponse<>(

@@ -3,6 +3,7 @@ package com.udayan.tallyapp.user;
 
 import com.udayan.tallyapp.model.BaseEntity;
 import com.udayan.tallyapp.user.address.Address;
+import com.udayan.tallyapp.user.profile.ShortProfile;
 import com.udayan.tallyapp.user.role.Role;
 import com.udayan.tallyapp.user.token.Token;
 import jakarta.persistence.*;
@@ -51,6 +52,8 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private List<Token> tokens;
     @OneToMany(mappedBy = "user")
     private List<Address> addresses;
+    @OneToMany(mappedBy = "user")
+    List<ShortProfile> shortProfiles;
 
     @Override
     public String getName() {

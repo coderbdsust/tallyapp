@@ -1,12 +1,14 @@
 package com.udayan.tallyapp.user.address;
 
-import com.udayan.tallyapp.user.User;
+import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
+import com.udayan.tallyapp.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AddressService {
@@ -35,5 +37,17 @@ public class AddressService {
     public List<AddressDTO.AddressResponse> getAddressResponseList(User user) {
         ArrayList<Address> addressList = addressRepository.findByUser(user);
         return addressMapper.addressToAddressResponseList(addressList);
+    }
+
+    public ApiResponse deleteAddress(UUID id, User currentUser) {
+
+        addressRepository.deleteById(id);
+
+        return ApiResponse
+                .builder()
+                .sucs(true)
+                .businessCode(ApiResponse.BusinessCode.OK.getValue())
+                .message("Address deleted successfully")
+                .build();
     }
 }

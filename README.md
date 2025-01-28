@@ -1,8 +1,13 @@
-# Tally Khata
+# Tally App
 
 ### Project Background
 This project is developed to maintain accounting, manufacturing process and employee information of a shop
 
+### API
+The following api are implemented so far and still going on.
+<img alt="Preview" src="screenshots/user-v1.png">
+<img alt="Preview" src="screenshots/auth-v1.png">
+<img alt="Preview" src="screenshots/profile-v1.png">
 
 ### Guides
 The following guides illustrate how to use some features concretely:
@@ -20,9 +25,10 @@ The following guides illustrate how to use some features concretely:
 * * [Spring Boot DevTools](https://docs.spring.io/spring-boot/3.4.0/reference/using/devtools.html)
 * * [Spring Data JPA](https://docs.spring.io/spring-boot/3.4.0/reference/data/sql.html#data.sql.jpa-and-spring-data)
 * [PostgreSQL](https://www.postgresql.org/ "PostgreSQL")
+* [Redis](https://redis.io/ "Redis")
 * [Git-SCM](https://git-scm.com/ "Git Home Page")
 * [Thymeleaf](https://www.thymeleaf.org/ "Thymeleaf")
 * [Java 17](https://jdk.java.net/archive/ "Java 17")
 
 ## Developers
-* [Biswajit Debnath](https://www.linkedin.com/in/coderbd/ "Biswajit Debnath's LinkedIn Profile") - Full Stack Java Developer
+* [Biswajit Debnath](https://www.linkedin.com/in/coderbd/ "Biswajit Debnath's Linkedin Profile") - Full Stack Java Developer

@@ -12,15 +12,15 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 @Slf4j
-public class DateOfBirthDeserializer extends StdDeserializer<LocalDate> {
+public class DatePatternDeserializer extends StdDeserializer<LocalDate> {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    DateOfBirthDeserializer(){
+    DatePatternDeserializer(){
         super(LocalDate.class);
     }
 
     @Override
-    public LocalDate deserialize(JsonParser parser, DeserializationContext ctx) throws IOException  {
+    public LocalDate deserialize(JsonParser parser, DeserializationContext ctx) throws IOException {
         String value = parser.readValueAs(String.class);
         try {
             return LocalDate.parse(value, FORMATTER);

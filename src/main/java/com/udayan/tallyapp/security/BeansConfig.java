@@ -56,8 +56,8 @@ public class BeansConfig {
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:4200",
                 "http://localhost:1080",
-                "https://tallykhata-ui.firebaseapp.com",
-                "https://tallykhata-ui.web.app"
+                "https://tallyapp-ui.firebaseapp.com",
+                "https://tallyapp-ui.web.app"
         ));
         config.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.ORIGIN,

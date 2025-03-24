@@ -2,10 +2,11 @@ package com.udayan.tallyapp.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.udayan.tallyapp.user.deserializer.DateOfBirthDeserializer;
+import com.udayan.tallyapp.user.deserializer.DatePatternDeserializer;
 import com.udayan.tallyapp.validator.EmailOrUsername;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class AuthUser {
         @NotEmpty(message = "{password.notempty}")
         @Size(min = 8, max = 30, message = "{password.size}")
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        @ToString.Exclude
         private String password;
         @Email(message = "{email.notvalid}")
         @NotEmpty(message = "{email.notempty}")
@@ -35,7 +37,7 @@ public class AuthUser {
         private String fullName;
         @NotNull(message = "{dateofbirth.notnull}")
         @Past(message = "{dateofbirth.past}")
-        @JsonDeserialize(using= DateOfBirthDeserializer.class )
+        @JsonDeserialize(using= DatePatternDeserializer.class )
         private LocalDate dateOfBirth;
     }
 

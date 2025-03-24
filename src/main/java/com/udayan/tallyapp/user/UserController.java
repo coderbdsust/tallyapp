@@ -36,7 +36,7 @@ public class UserController {
     @PutMapping("/profile")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateUserProfile(@Valid @RequestBody UserDTO.UserRequest userRequest) throws InvalidDataException {
-        log.debug("/users/v1/profile");
+        log.debug("/users/v1/profile {}", userRequest);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userService.updateUserProfile(userRequest, currentUser.getUsername()));
@@ -49,6 +49,15 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userService.changePassword(changePassReq, currentUser));
+    }
+
+    @GetMapping("/search-users-for-organization")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> searchUsers(@RequestParam(name = "searchKey", defaultValue = "", required = false) String searchKey,
+                                         @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+                                         @RequestParam(name = "size", defaultValue = "10", required = false) int size){
+        log.debug("/users/v1/search-users-for-organization : {}, {}, {}", searchKey, page, size);
+        return ResponseEntity.ok(userService.searchUsers(searchKey, page, size));
     }
 
 }

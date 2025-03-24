@@ -2,15 +2,13 @@ package com.udayan.tallyapp.user;
 
 
 import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.organization.Organization;
 import com.udayan.tallyapp.user.address.Address;
 import com.udayan.tallyapp.user.profile.ShortProfile;
 import com.udayan.tallyapp.user.role.Role;
 import com.udayan.tallyapp.user.token.Token;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.FetchType.LAZY;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -38,6 +37,7 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private String salt;
     @Column(unique = true, nullable = false)
     private String email;
+    @Column(unique = true, nullable = true)
     private String mobileNo;
     private String gender;
     private Boolean isMobileNumberVerified=false;
@@ -54,6 +54,13 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private List<Address> addresses;
     @OneToMany(mappedBy = "user")
     List<ShortProfile> shortProfiles;
+    @ManyToMany(fetch = LAZY)
+    @JoinTable(
+            name = "users_organizations",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "organizations_id")
+    )
+    private List<Organization> organizations;
 
     @Override
     public String getName() {

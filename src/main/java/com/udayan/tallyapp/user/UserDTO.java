@@ -1,6 +1,8 @@
 package com.udayan.tallyapp.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.udayan.tallyapp.user.address.AddressDTO;
+import com.udayan.tallyapp.user.deserializer.DatePatternDeserializer;
 import com.udayan.tallyapp.user.profile.ShortProfileDTO;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
@@ -49,6 +51,15 @@ public class UserDTO {
         private String gender;
         @NotNull(message = "{dateofbirth.notnull}")
         @Past(message = "{dateofbirth.past}")
+        @JsonDeserialize(using= DatePatternDeserializer.class )
         private LocalDate dateOfBirth;
+    }
+
+    @Data
+    @Builder
+    public static class UserForOrgResponse{
+        private UUID id;
+        private String fullName;
+        private String email;
     }
 }

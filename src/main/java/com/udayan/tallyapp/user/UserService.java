@@ -16,12 +16,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -118,7 +122,9 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new InvalidDataException("No data found using this username : " + username));
 
-        if (userRepository.findByMobileNo(userRequest.getMobileNo()).isPresent()) {
+        if (user.getMobileNo() != null &&
+                !user.getMobileNo().equals(userRequest.getMobileNo())
+                && userRepository.findByMobileNo(userRequest.getMobileNo()).isPresent()) {
             throw new DuplicateKeyException("Mobile number is used by other user");
         }
 
@@ -139,5 +145,20 @@ public class UserService {
                 .businessCode(ApiResponse.BusinessCode.OK.getValue())
                 .message("Short profile deleted successfully")
                 .build();
+    }
+
+    public List<UserDTO.UserForOrgResponse> searchUsers(String searchKey, int page, int size) {
+        if(searchKey.length() < 5){
+            throw new InvalidDataException("Minimum search key length is 5");
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> users = userRepository.searchUserByUsernameOrEmail(searchKey, pageable);
+        return users.stream().map(u -> UserDTO.UserForOrgResponse
+                .builder()
+                .id(u.getId())
+                .fullName(u.getFullName())
+                .email(u.getEmail())
+                .build())
+                .toList();
     }
 }

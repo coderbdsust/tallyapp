@@ -113,21 +113,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            InvalidDateFormat.class})
-    public ResponseEntity<?> badRequest(InvalidDateFormat ex, HttpServletRequest request) {
-        log.error("",ex);
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(ex.getMessage())
-                .errors(new ArrayList<>())
-                .path(request.getRequestURI())
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler({
             InvalidDataException.class})
     public ResponseEntity<?> badRequest(InvalidDataException ex, HttpServletRequest request) {
         log.error("",ex);
@@ -155,6 +140,21 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
+
+    @ExceptionHandler({
+            DependencyException.class})
+    public ResponseEntity<?> dependencyException(DependencyException ex, HttpServletRequest request) {
+        log.error("",ex);
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(ex.getMessage())
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler({
@@ -186,7 +186,7 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
-
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handle(Exception ex,
                                          HttpServletRequest request, HttpServletResponse response) {

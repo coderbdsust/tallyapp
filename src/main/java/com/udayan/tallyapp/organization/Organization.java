@@ -12,6 +12,8 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name="organization")
@@ -45,9 +47,14 @@ public class Organization extends BaseEntity {
     @ToString.Exclude
     private List<User> user;
 
-    @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     @ToString.Exclude
+    @ManyToMany(fetch = LAZY)
+    @JoinTable(
+            name = "organization_employees",
+            joinColumns = @JoinColumn(name = "organization_id"),
+            inverseJoinColumns = @JoinColumn(name = "employees_id")
+    )
     private List<Employee> employees;
 
 }

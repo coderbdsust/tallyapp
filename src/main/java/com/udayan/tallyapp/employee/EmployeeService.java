@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,9 @@ public class EmployeeService {
 
     @Autowired
     OrganizationRepository organizationRepository;
+
+    @Autowired
+    OrganizationEmployeeRepository organizationEmployeeRepository;
 
     @Autowired
     EmployeeMapper employeeMapper;
@@ -90,17 +94,21 @@ public class EmployeeService {
         return new ArrayList<>(Arrays.asList(Status.values()));
     }
 
+    @Transactional
     public ApiResponse deleteEmployee(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(
-                () -> new InvalidDataException("No employee found using this id : " + employeeId)
+                () -> new InvalidDataException("No employee found")
         );
         try {
+
+            organizationEmployeeRepository.deleteEmployeeByEmployeeId(employee);
+
             employeeRepository.delete(employee);
 
             return ApiResponse.builder()
                     .businessCode(ApiResponse.BusinessCode.OK.getValue())
                     .sucs(true)
-                    .message("Employee successfully deleted using id : " + employeeId)
+                    .message("Employee successfully deleted")
                     .build();
         } catch (DataIntegrityViolationException e) {
             throw new DependencyException("Couldn't delete employee due to dependency");

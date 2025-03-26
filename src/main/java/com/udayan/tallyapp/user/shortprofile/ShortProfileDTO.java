@@ -1,4 +1,4 @@
-package com.udayan.tallyapp.user.profile;
+package com.udayan.tallyapp.user.shortprofile;
 
 import lombok.Builder;
 import lombok.Data;

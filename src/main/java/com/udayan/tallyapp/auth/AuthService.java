@@ -8,6 +8,7 @@ import com.udayan.tallyapp.redis.RedisRateLimitService;
 import com.udayan.tallyapp.redis.RedisTokenService;
 import com.udayan.tallyapp.redis.exp.TooManyRequestException;
 import com.udayan.tallyapp.security.jwt.JwtService;
+import com.udayan.tallyapp.user.GenderType;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
 import com.udayan.tallyapp.user.otp.OTPType;
@@ -30,8 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -73,6 +73,48 @@ public class AuthService {
 
     @Value("${application.account.verification.otp.expiration.minute}")
     private long accountVerificationOTPExpirationMinute;
+
+    @Transactional
+    public AuthUser.UserRequest initiateAdmin(AuthUser.UserRequest userRequest) {
+        Role adminRole = roleRepository.findByName("ADMIN").orElseThrow(() -> new IllegalStateException("Role 'ADMIN' not initiated correctly"));
+
+        Optional<User> adminByEmail = userRepository.findByEmail(userRequest.getEmail());
+        if(adminByEmail.isPresent()){
+            userRequest.setId(adminByEmail.get().getId());
+            return userRequest;
+        }
+
+        Optional<User> adminByUsername = userRepository.findByUsername(userRequest.getUsername());
+        if(adminByUsername.isPresent()){
+            userRequest.setId(adminByUsername.get().getId());
+            return userRequest;
+        }
+        Optional<User> adminByMobileNo = userRepository.findByEmail(userRequest.getMobileNo());
+        if(adminByMobileNo.isPresent()){
+            userRequest.setId(adminByMobileNo.get().getId());
+            return userRequest;
+        }
+
+        User user = new User();
+        user.setUsername(userRequest.getUsername());
+        user.setEmail(userRequest.getEmail());
+        user.setSalt(Utils.generateSalt(32));
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword() + user.getSalt()));
+        user.setMobileNo(userRequest.getMobileNo());
+        user.setFullName(userRequest.getFullName());
+        user.setDateOfBirth(userRequest.getDateOfBirth());
+        user.setGender(userRequest.getGender());
+        user.setRoles(List.of(adminRole));
+        user.setEnabled(true);
+        user.setTfaEnabled(false);
+        user.setIsMobileNumberVerified(true);
+
+        user = userRepository.save(user);
+
+        userRequest.setId(user.getId());
+
+        return userRequest;
+    }
 
     @Transactional
     public AuthUser.UserRequest registerUser(AuthUser.UserRequest userRequest) throws DuplicateKeyException, EmailSendingException {
@@ -184,16 +226,6 @@ public class AuthService {
         if(!redisRateLimitService.isVerifyUserAllowed(user.getUsername())) {
             throw new TooManyRequestException("Too many request, Please wait and try later");
         }
-
-//        User retrieveUser = userRepository.findByUsername(user.getUsername())
-//                .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
-//
-//        if (retrieveUser.isEnabled()) {
-//            return ApiResponse.builder()
-//                    .sucs(true)
-//                    .userDetail(retrieveUser.getUsername())
-//                    .message("User already verified").build();
-//        }
 
         UserOTP userOTP = userOTPRepository.findActiveOTPByUserParamAndCode(user.getUsername(), user.getOtpCode(), OTPType.ACCOUNT_VERIFICATION.getName())
                 .orElseThrow(() -> new InvalidDataException("Invalid OTP"));
@@ -318,4 +350,7 @@ public class AuthService {
         throw new InvalidTokenException("Invalid refresh token");
     }
 
+    public List<GenderType> getGenderList() {
+        return new ArrayList<>(Arrays.stream(GenderType.values()).toList());
+    }
 }

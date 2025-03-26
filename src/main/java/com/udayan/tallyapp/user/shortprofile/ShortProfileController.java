@@ -1,4 +1,4 @@
-package com.udayan.tallyapp.user.profile;
+package com.udayan.tallyapp.user.shortprofile;
 
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.user.User;

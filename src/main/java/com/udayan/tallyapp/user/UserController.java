@@ -59,5 +59,4 @@ public class UserController {
         log.debug("/users/v1/search-users-for-organization : {}, {}, {}", searchKey, page, size);
         return ResponseEntity.ok(userService.searchUsers(searchKey, page, size));
     }
-
 }

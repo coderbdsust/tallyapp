@@ -88,4 +88,10 @@ public class AuthenticationController {
         ApiResponse res = authForgotService.resetPassword(resetPassReq);
         return ResponseEntity.ok().body(res);
     }
+
+    @GetMapping("/gender-list")
+    public ResponseEntity<?> getGenderList(){
+        log.debug("/auth/v1/gender-list");
+        return ResponseEntity.ok(authService.getGenderList());
+    }
 }

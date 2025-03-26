@@ -4,7 +4,7 @@ package com.udayan.tallyapp.user;
 import com.udayan.tallyapp.model.BaseEntity;
 import com.udayan.tallyapp.organization.Organization;
 import com.udayan.tallyapp.user.address.Address;
-import com.udayan.tallyapp.user.profile.ShortProfile;
+import com.udayan.tallyapp.user.shortprofile.ShortProfile;
 import com.udayan.tallyapp.user.role.Role;
 import com.udayan.tallyapp.user.token.Token;
 import jakarta.persistence.*;
@@ -39,7 +39,8 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private String email;
     @Column(unique = true, nullable = true)
     private String mobileNo;
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private GenderType gender;
     private Boolean isMobileNumberVerified=false;
     private String fullName;
     private LocalDate dateOfBirth;

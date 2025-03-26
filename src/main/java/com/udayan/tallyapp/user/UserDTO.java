@@ -3,7 +3,7 @@ package com.udayan.tallyapp.user;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.udayan.tallyapp.user.address.AddressDTO;
 import com.udayan.tallyapp.user.deserializer.DatePatternDeserializer;
-import com.udayan.tallyapp.user.profile.ShortProfileDTO;
+import com.udayan.tallyapp.user.shortprofile.ShortProfileDTO;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +24,7 @@ public class UserDTO {
         private String email;
         private String mobileNo;
         private String fullName;
-        private String gender;
+        private GenderType gender;
         private LocalDate dateOfBirth;
         private boolean enabled;
         private boolean accountLocked;
@@ -47,8 +47,8 @@ public class UserDTO {
         private String mobileNo;
         @NotEmpty(message = "{name.notempty}")
         private String fullName;
-        @NotEmpty(message = "{gender.notempty}")
-        private String gender;
+        @NotNull(message = "{gender.notempty}")
+        private GenderType gender;
         @NotNull(message = "{dateofbirth.notnull}")
         @Past(message = "{dateofbirth.past}")
         @JsonDeserialize(using= DatePatternDeserializer.class )

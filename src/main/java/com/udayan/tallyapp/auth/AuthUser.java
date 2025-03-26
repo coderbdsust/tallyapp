@@ -2,8 +2,11 @@ package com.udayan.tallyapp.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.udayan.tallyapp.user.GenderType;
 import com.udayan.tallyapp.user.deserializer.DatePatternDeserializer;
 import com.udayan.tallyapp.validator.EmailOrUsername;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.ToString;
@@ -32,7 +35,8 @@ public class AuthUser {
 //        @Pattern(regexp = "01[3-9]\\d{8}$",message = "{mobileno.pattern}")
         private String mobileNo;
 //        @NotEmpty(message = "{gender.notempty}")
-        private String gender;
+        @Enumerated(EnumType.STRING)
+        private GenderType gender;
         @NotEmpty(message = "{name.notempty}")
         private String fullName;
         @NotNull(message = "{dateofbirth.notnull}")

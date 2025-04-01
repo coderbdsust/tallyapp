@@ -64,10 +64,14 @@ public class EmployeeService {
         return new ArrayList<>(Arrays.asList(EmployeeType.values()));
     }
 
-    public PageResponse<EmployeeDTO.EmployeeResponse> allEmployeeByOrganization(UUID organizationId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+    public PageResponse<EmployeeDTO.EmployeeResponse> allEmployeeByOrganization(UUID organizationId, int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by( "employeeBillingType","createdDate").ascending());
 
-        Page<Employee> employees = employeeRepository.findAllByOrganizationId(organizationId, pageable);
+        Page<Employee> employees;
+        if (search != null && search.length() > 4) {
+            employees = employeeRepository.findAllByOrganizationAndSearchParam(organizationId, search, pageable);
+        } else
+            employees = employeeRepository.findAllByOrganizationId(organizationId, pageable);
 
         List<EmployeeDTO.EmployeeResponse> employeeList = employees
                 .stream()

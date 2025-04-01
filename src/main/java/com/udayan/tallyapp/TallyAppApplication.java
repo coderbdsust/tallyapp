@@ -46,8 +46,10 @@ public class TallyAppApplication implements  CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-		if(args==null || args.length<3)
+		if(args==null || args.length<3) {
+			log.error("Admin user initiation failed");
 			throw new IllegalStateException("Admin user initiation failed");
+		}
 
 		AuthUser.UserRequest authUser = new AuthUser.UserRequest();
 

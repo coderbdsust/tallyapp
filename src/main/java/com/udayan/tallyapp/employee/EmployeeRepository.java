@@ -14,4 +14,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     @Query("SELECT e FROM Employee e JOIN e.organization o WHERE o.id = :organizationId")
     Page<Employee> findAllByOrganizationId(@Param("organizationId") UUID organizationId, Pageable pageable);
+
+    @Query("SELECT e FROM Employee e JOIN e.organization o WHERE o.id = :organizationId and " +
+            "LOWER(e.fullName) LIKE LOWER(CONCAT('%', :searchKey, '%')) OR " +
+            "LOWER(e.mobileNo) LIKE LOWER(CONCAT('%', :searchKey, '%'))")
+    Page<Employee> findAllByOrganizationAndSearchParam(@Param("organizationId") UUID organizationId,
+                                                       @Param("searchKey") String searchKey,
+                                                       Pageable pageable);
 }

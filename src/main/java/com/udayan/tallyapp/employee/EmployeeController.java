@@ -35,9 +35,10 @@ public class EmployeeController {
     @GetMapping("{organizationId}/all-employee")
     public ResponseEntity<?> allEmployees(@PathVariable("organizationId") UUID organizationId,
                                           @RequestParam(name = "page", defaultValue = "0", required = false) int page,
-                                          @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
+                                          @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+                                          @RequestParam(name = "search", defaultValue = "", required = false) String search) {
         log.debug("/employee/v1/all-employee {}", organizationId);
-        return ResponseEntity.ok(employeeService.allEmployeeByOrganization(organizationId, page, size));
+        return ResponseEntity.ok(employeeService.allEmployeeByOrganization(organizationId, page, size, search));
     }
 
     @GetMapping("/employee-type")

@@ -29,7 +29,17 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationDTO.OrganizationRequest createOrganization(OrganizationDTO.OrganizationRequest orgRequest, User currentUser) {
-        Organization org = new Organization();
+        Organization org;
+        if (orgRequest.getId() != null) {
+            log.debug("Looking for organization information using id: " + orgRequest.getId());
+            org = organizationRepository.findById(orgRequest.getId()).orElseThrow(
+                    () -> new InvalidDataException("Invalid organization id for update")
+            );
+            log.debug("Updating organization information using id: " + orgRequest.getId());
+        } else {
+            org = new Organization();
+        }
+
         org.setId(orgRequest.getId());
         org.setOrgName(orgRequest.getOrgName());
         org.setOrgRegNumber(orgRequest.getOrgRegNumber());
@@ -65,7 +75,7 @@ public class OrganizationService {
 
     public Organization getOrganization(UUID id, User currentUser) {
         Organization organization = organizationRepository.findById(id).orElseThrow(
-                () -> new InvalidDataException("No organization found using this id: "+id)
+                () -> new InvalidDataException("No organization found using this id: " + id)
         );
         return organization;
     }
@@ -122,7 +132,7 @@ public class OrganizationService {
                 .sucs(true)
                 .userDetail(currentUser.getEmail())
                 .businessCode(ApiResponse.BusinessCode.OK.getValue())
-                .message(newEntries.size()+ " user(s) assigned to organization successfully")
+                .message(newEntries.size() + " user(s) assigned to organization successfully")
                 .build();
     }
 }

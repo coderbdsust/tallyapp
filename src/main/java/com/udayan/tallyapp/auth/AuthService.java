@@ -271,43 +271,60 @@ public class AuthService {
 
     public Login.LoginResponse doLogin(Login.LoginRequest request) throws UserNotActiveException, UserAccountIsLocked {
 
-        User usr = userRepository.findByUsernameOrEmail(request.getUsername())
+        User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username or email"));
 
-        if (!usr.isEnabled()) {
-            throw new UserNotActiveException("User not activated yet, Please check email");
-        }
+        validateUserStatus(user);
 
-        if (!usr.isAccountNonLocked()) {
-            throw new UserAccountIsLocked("User account is locked");
-        }
-
-        String saltedPassword = request.getPassword() + usr.getSalt();
+        String saltedPassword = request.getPassword() + user.getSalt();
 
         var auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        saltedPassword
-                )
+                new UsernamePasswordAuthenticationToken(request.getUsername(), saltedPassword)
         );
-        var claims = new HashMap<String, Object>();
-        var user = ((User) auth.getPrincipal());
-        claims.put("fullName", user.getFullName());
-        claims.put("email", user.getEmail());
 
-        var accessToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
-        var refreshToken = jwtService.generateRefreshToken(claims, (User) auth.getPrincipal());
+        var claims = createClaims(user);
+        String accessToken = jwtService.generateToken(claims, user);
+        String refreshToken = jwtService.generateRefreshToken(claims, user);
 
-        tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
-        tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
-        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration);
-        // tokenService.saveUserToken(user, accessToken, TokenType.ACCESS_TOKEN);
+        handleTokens(user, accessToken, refreshToken);
 
-        return Login.LoginResponse.builder().
-                accessToken(accessToken)
+        return Login.LoginResponse.builder()
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    /**
+     * Validates if the user is active and not locked.
+     */
+    private void validateUserStatus(User user) throws UserNotActiveException, UserAccountIsLocked {
+        if (!user.isEnabled()) {
+            throw new UserNotActiveException("User not activated yet, Please check email");
+        }
+        if (!user.isAccountNonLocked()) {
+            throw new UserAccountIsLocked("User account is locked");
+        }
+    }
+
+    /**
+     * Creates claims for JWT token.
+     */
+    private Map<String, Object> createClaims(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("fullName", user.getFullName());
+        claims.put("email", user.getEmail());
+        return claims;
+    }
+
+    /**
+     * Handles token revocation and saving new tokens.
+     */
+    private void handleTokens(User user, String accessToken, String refreshToken) {
+        tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
+        tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
+        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration);
+    }
+
 
     public Login.LoginResponse refreshToken(Login.RefreshToken token) throws InvalidTokenException, UserNotActiveException, UserAccountIsLocked {
         String username = null;
@@ -320,20 +337,12 @@ public class AuthService {
         User user = this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (!user.isEnabled()) {
-            throw new UserNotActiveException("User not activated yet, please check email");
-        }
-
-        if (!user.isAccountNonLocked()) {
-            throw new UserAccountIsLocked("User account is locked");
-        }
+        validateUserStatus(user);
 
         boolean isTokenValid = tokenService.isTokenValid(token.getRefreshToken());
 
         if (jwtService.isTokenValid(token.getRefreshToken(), user) && isTokenValid) {
-            var claims = new HashMap<String, Object>();
-            claims.put("fullName", user.getFullName());
-            claims.put("email", user.getEmail());
+            var claims = createClaims(user);
 
             var accessToken = jwtService.generateToken(claims, user);
             var refreshToken = jwtService.generateRefreshToken(claims, user);

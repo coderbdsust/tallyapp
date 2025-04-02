@@ -43,10 +43,18 @@ public class ProductService {
 
     public ProductDTO.ProductResponse editProduct(UUID productId, ProductDTO.ProductRequest productRequest) {
         Product product = productRepository.findById(productId).orElseThrow(
-                ()->new InvalidDataException("No product found")
+                () -> new InvalidDataException("No product found")
         );
+
+        Employee employee = employeeRepository.findById(productRequest.getMadeBy()).orElseThrow(
+                () -> new InvalidDataException("Employee not found")
+        );
+
+        product.setMadeBy(employee);
+
         product = productMapper.mergeRequestToEntity(productRequest, product);
         product.setUpdatedDate(LocalDateTime.now());
+
         product = productRepository.save(product);
         return productMapper.entityToResponse(product);
     }

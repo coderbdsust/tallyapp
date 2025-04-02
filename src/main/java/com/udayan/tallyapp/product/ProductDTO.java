@@ -28,6 +28,7 @@ public class ProductDTO {
         private String imageUrl;
         private Boolean sold;
         private LocalDate soldDate;
+        private UUID madeBy;
     }
 
 

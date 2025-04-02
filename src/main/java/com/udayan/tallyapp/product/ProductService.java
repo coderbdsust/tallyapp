@@ -76,8 +76,12 @@ public class ProductService {
     public PageResponse<ProductDTO.ProductResponse> getProducts(UUID organizationId, String search, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Page<Product> products;
 
-        Page<Product> products = productRepository.findProductsByOrganization(organizationId, pageable);
+        if (search != null && search.length() > 2) {
+            products = productRepository.searchProductsByOrganizationAndSearchKey(organizationId, search, pageable);
+        } else
+            products = productRepository.findProductsByOrganization(organizationId, pageable);
 
         List<ProductDTO.ProductResponse> productResponseList =  products
                 .stream()

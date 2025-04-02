@@ -114,6 +114,7 @@ public class OrganizationService {
         log.debug("Existing organization users: {}", existingUserIds);
 
         List<UserOrganization> newEntries = users.stream()
+                .filter(user-> user.getOrganizations().isEmpty())
                 .filter(user -> !existingUserIds.contains(user.getId())) // Skip existing users
                 .map(user -> UserOrganization.builder()
                         .id(new UserOrganizationId(user.getId(), organization.getId()))

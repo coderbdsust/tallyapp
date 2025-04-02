@@ -18,4 +18,12 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "WHERE oe.organizationId.id = :organizationId")
     Page<Product> findProductsByOrganization(@Param("organizationId") UUID organizationId, Pageable pageable);
 
+    @Query("SELECT p FROM Product p " +
+            "JOIN p.madeBy e " +
+            "JOIN OrganizationEmployee oe ON oe.employeesId.id = e.id " +
+            "WHERE oe.organizationId.id = :organizationId " +
+            "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Product> searchProductsByOrganizationAndSearchKey(@Param("organizationId") UUID organizationId, @Param("search") String search, Pageable pageable);
+
 }

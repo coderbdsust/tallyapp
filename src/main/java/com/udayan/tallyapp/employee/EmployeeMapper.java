@@ -11,6 +11,7 @@ public class EmployeeMapper {
         employee.setFullName(empRequest.getFullName());
         employee.setDateOfBirth(empRequest.getDateOfBirth());
         employee.setMobileNo(empRequest.getMobileNo());
+        employee.setProfileImage(empRequest.getProfileImage());
         employee.setEmpAddressLine(empRequest.getEmpAddressLine());
         employee.setEmpCity(empRequest.getEmpCity());
         employee.setEmpPostcode(empRequest.getEmpPostcode());
@@ -29,6 +30,7 @@ public class EmployeeMapper {
                 .fullName(employee.getFullName())
                 .dateOfBirth(employee.getDateOfBirth())
                 .mobileNo(employee.getMobileNo())
+                .profileImage(employee.getProfileImage())
                 .empAddressLine(employee.getEmpAddressLine())
                 .empCity(employee.getEmpCity())
                 .empPostcode(employee.getEmpPostcode())

@@ -68,4 +68,22 @@ public class OrganizationController {
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(organizationService.deleteOrganization(id, currentUser));
     }
+
+    @GetMapping("/{organizationId}/total-employee")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getOrganizationTotalEmployee(@PathVariable("organizationId") UUID orgId) {
+        log.debug("/organization/v1/total-employee {}",orgId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(organizationService.getOrganizationTotalEmployee(orgId, currentUser));
+    }
+
+    @GetMapping("/{organizationId}/top-employee")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getOrganizationTopEmployee(@PathVariable("organizationId") UUID orgId) {
+        log.debug("/organization/v1/top-employee {}",orgId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(organizationService.getOrganizationTopEmployee(orgId, currentUser));
+    }
 }

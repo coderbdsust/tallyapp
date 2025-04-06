@@ -28,6 +28,7 @@ public class EmployeeDTO {
         @NotEmpty(message = "Employee mobile no can't be empty")
         @Pattern(regexp = "01[3-9]\\d{8}$",message = "Employee mobile number is invalid")
         private String mobileNo;
+        private String profileImage;
         private String empAddressLine;
         private String empCity;
         private String empPostcode;
@@ -52,6 +53,7 @@ public class EmployeeDTO {
         private String fullName;
         private LocalDate dateOfBirth;
         private String mobileNo;
+        private String profileImage;
         private String empAddressLine;
         private String empCity;
         private String empPostcode;

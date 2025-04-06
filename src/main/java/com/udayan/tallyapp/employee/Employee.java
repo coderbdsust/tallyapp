@@ -23,6 +23,7 @@ public class Employee extends BaseEntity {
     private String fullName;
     private LocalDate dateOfBirth;
     private String mobileNo;
+    private String profileImage;
     private String empAddressLine;
     private String empCity;
     private String empPostcode;

@@ -49,4 +49,13 @@ public class OrganizationDTO {
         @NotNull(message = "Organization status can't be empty")
         private Status status;
     }
+
+    @Data
+    @Builder
+    public static class OrganizationTopEmployee {
+        private String fullName;
+        private LocalDate dateOfBirth;
+        private String mobileNo;
+        private String profileImage;
+    }
 }

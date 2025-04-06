@@ -2,6 +2,7 @@ package com.udayan.tallyapp.organization;
 
 import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
+import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,8 +63,11 @@ public class OrganizationService {
         Organization saved = organizationRepository.save(org);
         orgRequest.setId(saved.getId());
 
-        currentUser.setOrganizations(Collections.singletonList(saved));
-        userRepository.save(currentUser);
+        User user = userRepository.findByUsername(currentUser.getUsername())
+                .orElseThrow(()->new InvalidDataException("Invalid user for organization registry"));
+
+        user.getOrganizations().add(saved);
+        userRepository.save(user);
 
         return orgRequest;
     }
@@ -114,7 +118,6 @@ public class OrganizationService {
         log.debug("Existing organization users: {}", existingUserIds);
 
         List<UserOrganization> newEntries = users.stream()
-                .filter(user-> user.getOrganizations().isEmpty())
                 .filter(user -> !existingUserIds.contains(user.getId())) // Skip existing users
                 .map(user -> UserOrganization.builder()
                         .id(new UserOrganizationId(user.getId(), organization.getId()))
@@ -135,5 +138,27 @@ public class OrganizationService {
                 .businessCode(ApiResponse.BusinessCode.OK.getValue())
                 .message(newEntries.size() + " user(s) assigned to organization successfully")
                 .build();
+    }
+
+    public Long getOrganizationTotalEmployee(UUID orgId, User currentUser) {
+        Organization organization = organizationRepository.findById(orgId).orElseThrow(
+                ()->new InvalidDataException("Invalid organization id")
+        );
+        return (long) organization.getEmployees().size();
+    }
+
+    public OrganizationDTO.OrganizationTopEmployee getOrganizationTopEmployee(UUID orgId, User currentUser) {
+        Organization organization = organizationRepository.findById(orgId).orElseThrow(
+                ()->new InvalidDataException("Invalid organization id")
+        );
+
+        return organization.getEmployees().stream()
+                .max(Comparator.comparing(Employee::getBillingRate)) // Find employee with max billing rate
+                .map(employee -> new OrganizationDTO.OrganizationTopEmployee(
+                        employee.getFullName(),
+                        employee.getDateOfBirth(),
+                        employee.getMobileNo(),
+                        employee.getProfileImage()
+                )).orElse(null);
     }
 }

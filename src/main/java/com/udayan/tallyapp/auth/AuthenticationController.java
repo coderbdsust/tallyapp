@@ -1,9 +1,11 @@
 package com.udayan.tallyapp.auth;
 
 
-import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.common.ApiResponse;
+import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.redis.RedisRateLimitService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -42,15 +44,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody Login.LoginRequest loginRequest) throws UserNotActiveException, UserAccountIsLocked {
+    public ResponseEntity<?> login(@Valid @RequestBody Login.LoginRequest loginRequest, HttpServletRequest httpRequest,HttpServletResponse httpResponse) throws UserNotActiveException, UserAccountIsLocked {
         log.info("request for login {}", loginRequest.getUsername());
-        return ResponseEntity.ok().body(authService.doLogin(loginRequest));
+        return ResponseEntity.ok().body(authService.doLogin(loginRequest, httpRequest, httpResponse));
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody Login.RefreshToken refreshToken) throws InvalidTokenException, UserNotActiveException, UserAccountIsLocked {
-        log.info("request using refresh-token {}", refreshToken);
-        return ResponseEntity.ok().body(authService.refreshToken(refreshToken));
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws InvalidTokenException, UserNotActiveException, UserAccountIsLocked {
+        log.info("request using refresh-token");
+        return ResponseEntity.ok().body(authService.refreshToken(request, response));
     }
 
     @PostMapping("/verify")

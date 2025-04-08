@@ -52,6 +52,14 @@ public class JwtService {
         return buildToken(extraClaims, userDetails, refreshTokenExpiration);
     }
 
+    public Date getAccessTokenExpiration(){
+        return new Date(System.currentTimeMillis() + jwtExpiration);
+    }
+
+    public Date getRefreshTokenExpiration(){
+        return new Date(System.currentTimeMillis() + refreshTokenExpiration);
+    }
+
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,

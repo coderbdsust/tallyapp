@@ -1,9 +1,12 @@
 package com.udayan.tallyapp.auth;
 
 import com.udayan.tallyapp.validator.EmailOrUsername;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Date;
 
 public class Login {
 
@@ -28,5 +31,16 @@ public class Login {
     @Data
     public static class RefreshToken {
         private String refreshToken;
+    }
+
+    @Data
+    @Builder
+    public static class UserResponse {
+        private String fullName;
+        private String username;
+        private String email;
+        private String role;
+        private Date accessTokenExpiry;
+        private Date refreshTokenExpiry;
     }
 }

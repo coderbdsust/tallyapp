@@ -6,6 +6,7 @@ import com.udayan.tallyapp.common.PageResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.employee.EmployeeRepository;
+import com.udayan.tallyapp.organization.Organization;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,8 +37,10 @@ public class ProductService {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(
                 ()->new InvalidDataException("Couldn't find any employee")
         );
+        Organization ownerOrganization = employee.getOrganization().get(0);
         Product product = productMapper.requestToEntity(productRequest);
         product.setMadeBy(employee);
+        product.setOwnerOrganization(ownerOrganization);
         product = productRepository.save(product);
         return productMapper.entityToResponse(product);
     }
@@ -50,7 +54,11 @@ public class ProductService {
                 () -> new InvalidDataException("Employee not found")
         );
 
+        Organization ownerOrganization = employee.getOrganization().get(0);
+
         product.setMadeBy(employee);
+
+        product.setOwnerOrganization(ownerOrganization);
 
         product = productMapper.mergeRequestToEntity(productRequest, product);
         product.setUpdatedDate(LocalDateTime.now());
@@ -97,5 +105,15 @@ public class ProductService {
                 products.isFirst(),
                 products.isLast()
         );
+    }
+
+    public ProductDTO.TotalProductResponse totalProducts(UUID organizationId) {
+
+        Long totalProduct = productRepository.totalProductByOrganizationId(organizationId);
+
+        return ProductDTO.TotalProductResponse.builder()
+                .totalProducts(totalProduct)
+                .graph(new ArrayList<>())
+                .build();
     }
 }

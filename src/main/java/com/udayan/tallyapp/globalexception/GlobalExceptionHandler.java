@@ -2,6 +2,7 @@ package com.udayan.tallyapp.globalexception;
 
 
 import com.udayan.tallyapp.customexp.*;
+import com.udayan.tallyapp.fileuploader.FileUploadingException;
 import com.udayan.tallyapp.redis.exp.TooManyRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -160,6 +161,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             EmailSendingException.class})
     public ResponseEntity<?> sendingErrorException(EmailSendingException ex, HttpServletRequest request) {
+        log.error("",ex);
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.EXPECTATION_FAILED.value())
+                .error(HttpStatus.EXPECTATION_FAILED.getReasonPhrase())
+                .message(ex.getMessage())
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+    }
+
+    @ExceptionHandler({
+            FileUploadingException.class})
+    public ResponseEntity<?> fileUploadingException(FileUploadingException ex, HttpServletRequest request) {
         log.error("",ex);
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

@@ -2,11 +2,14 @@ package com.udayan.tallyapp.product;
 
 import com.udayan.tallyapp.employee.EmployeeDTO;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class ProductDTO {
@@ -47,5 +50,20 @@ public class ProductDTO {
         private LocalDate soldDate;
         private LocalDateTime createdDate;
         private EmployeeDTO.EmployeeResponse madeBy;
+    }
+
+    @Data
+    @Builder
+    public static class TotalProductResponse{
+        private Long totalProducts;
+        private ArrayList<Axis> graph=new ArrayList<>();
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Data
+    public static class Axis{
+        private Long x;
+        private String y;
     }
 }

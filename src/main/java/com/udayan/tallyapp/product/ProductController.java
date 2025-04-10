@@ -28,6 +28,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts(organizationId, search, page, size));
     }
 
+    @GetMapping("/{organizationId}/total-products")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> totalProducts(@PathVariable("organizationId") UUID organizationId){
+        return ResponseEntity.ok(productService.totalProducts(organizationId));
+    }
+
     @PostMapping("/{employeeId}/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addProduct(@PathVariable("employeeId") UUID employeeId, @Valid @RequestBody ProductDTO.ProductRequest productRequest){

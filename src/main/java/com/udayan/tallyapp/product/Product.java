@@ -2,6 +2,7 @@ package com.udayan.tallyapp.product;
 
 import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.organization.Organization;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -32,4 +33,7 @@ public class Product extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "made_by", referencedColumnName = "id")
     private Employee madeBy;
+    @ManyToOne
+    @JoinColumn(name = "owner_organization", referencedColumnName = "id")
+    private Organization ownerOrganization;
 }

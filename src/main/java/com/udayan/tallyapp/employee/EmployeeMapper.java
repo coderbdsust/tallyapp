@@ -1,9 +1,15 @@
 package com.udayan.tallyapp.employee;
 
+import com.udayan.tallyapp.fileuploader.StorageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeMapper {
+
+
+    @Autowired
+    StorageService storageService;
 
     public Employee requestToEntity(EmployeeDTO.EmployeeRequest empRequest) {
         Employee employee = new Employee();
@@ -30,7 +36,7 @@ public class EmployeeMapper {
                 .fullName(employee.getFullName())
                 .dateOfBirth(employee.getDateOfBirth())
                 .mobileNo(employee.getMobileNo())
-                .profileImage(employee.getProfileImage())
+                .profileImage(storageService.getFullURL(employee.getProfileImage()))
                 .empAddressLine(employee.getEmpAddressLine())
                 .empCity(employee.getEmpCity())
                 .empPostcode(employee.getEmpPostcode())

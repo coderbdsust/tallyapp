@@ -18,6 +18,7 @@ public class ProductMapper {
         return ProductDTO.ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
+                .code(product.getCode())
                 .description(product.getDescription())
                 .employeeCost(product.getEmployeeCost())
                 .productionCost(product.getProductionCost())
@@ -34,6 +35,7 @@ public class ProductMapper {
     public Product requestToEntity(ProductDTO.ProductRequest prodReq){
         Product product = new Product();
         product.setName(prodReq.getName());
+        product.setCode(prodReq.getCode());
         product.setDescription(prodReq.getDescription());
         product.setEmployeeCost(prodReq.getEmployeeCost());
         product.setProductionCost(prodReq.getProductionCost());
@@ -47,6 +49,7 @@ public class ProductMapper {
 
     public Product mergeRequestToEntity(ProductDTO.ProductRequest prodReq, Product product) {
         product.setName(prodReq.getName());
+        product.setCode(prodReq.getCode());
         product.setDescription(prodReq.getDescription());
         product.setEmployeeCost(prodReq.getEmployeeCost());
         product.setProductionCost(prodReq.getProductionCost());

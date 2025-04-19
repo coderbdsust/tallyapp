@@ -3,12 +3,14 @@ package com.udayan.tallyapp.product;
 
 import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.common.PageResponse;
+import com.udayan.tallyapp.customexp.DuplicateKeyException;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.employee.EmployeeRepository;
 import com.udayan.tallyapp.organization.Organization;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,13 +37,17 @@ public class ProductService {
 
     public ProductDTO.ProductResponse createProduct(UUID employeeId, ProductDTO.ProductRequest productRequest) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(
-                ()->new InvalidDataException("Couldn't find any employee")
+                () -> new InvalidDataException("Couldn't find any employee")
         );
         Organization ownerOrganization = employee.getOrganization().get(0);
         Product product = productMapper.requestToEntity(productRequest);
         product.setMadeBy(employee);
         product.setOwnerOrganization(ownerOrganization);
-        product = productRepository.save(product);
+        try {
+            product = productRepository.save(product);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateKeyException("Couldn't save product using same code");
+        }
         return productMapper.entityToResponse(product);
     }
 
@@ -62,14 +68,17 @@ public class ProductService {
 
         product = productMapper.mergeRequestToEntity(productRequest, product);
         product.setUpdatedDate(LocalDateTime.now());
-
-        product = productRepository.save(product);
+        try {
+            product = productRepository.save(product);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateKeyException("Couldn't save product using same code");
+        }
         return productMapper.entityToResponse(product);
     }
 
     public ApiResponse deleteProduct(UUID productId) {
         Product product = productRepository.findById(productId).orElseThrow(
-                ()->new InvalidDataException("No product found")
+                () -> new InvalidDataException("No product found")
         );
 
         productRepository.delete(product);
@@ -81,19 +90,27 @@ public class ProductService {
                 .build();
     }
 
-    public PageResponse<ProductDTO.ProductResponse> getProducts(UUID organizationId, String search, int page, int size) {
+    public PageResponse<ProductDTO.ProductResponse> getProducts(UUID organizationId, String search, String searchCriteria, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Product> products;
 
         if (search != null && search.length() > 2) {
-            products = productRepository.searchProductsByOrganizationAndSearchKey(organizationId, search, pageable);
+            products = switch (searchCriteria) {
+                case "name" ->
+                        productRepository.searchProductsByOrganizationAndProductName(organizationId, search, pageable);
+                case "code" ->
+                        productRepository.searchProductsByOrganizationAndProductCode(organizationId, search, pageable);
+                case "madeBy" ->
+                        productRepository.searchProductsByOrganizationAndEmployeeName(organizationId, search, pageable);
+                default -> productRepository.searchProductsByOrganizationAndSearchKey(organizationId, search, pageable);
+            };
         } else
             products = productRepository.findProductsByOrganization(organizationId, pageable);
 
-        List<ProductDTO.ProductResponse> productResponseList =  products
+        List<ProductDTO.ProductResponse> productResponseList = products
                 .stream()
-                .map(p->productMapper.entityToResponse(p))
+                .map(p -> productMapper.entityToResponse(p))
                 .toList();
 
         return new PageResponse<>(

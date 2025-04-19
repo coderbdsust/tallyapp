@@ -19,6 +19,8 @@ public class ProductDTO {
     public static class ProductRequest{
         @NotNull(message = "Product name can't be empty")
         private String name;
+        @NotNull(message = "Product code can't be empty")
+        private String code;
         @NotNull(message = "Description can't be empty")
         private String description;
         @NotNull(message = "Employee cost can't be empty")
@@ -40,6 +42,7 @@ public class ProductDTO {
     public static class ProductResponse{
         private UUID id;
         private String name;
+        private String code;
         private String description;
         private Double employeeCost;
         private Double productionCost;

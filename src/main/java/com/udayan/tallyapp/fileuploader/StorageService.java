@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.net.URL;
 import java.util.UUID;
 
 @Service
@@ -16,10 +17,10 @@ import java.util.UUID;
 public class StorageService {
 
     @Value("${application.file.upload.base.url}")
-    private String fileUploadServerBaseURL;
+    public String fileUploadServerBaseURL;
 
     @Value("${application.file.upload.base.directory}")
-    private String fileUploadServerBaseDirectory;
+    public String fileUploadServerBaseDirectory;
 
     public FileDTO.FileResponse uploadFile(MultipartFile file){
         String fileName = file.getOriginalFilename();
@@ -56,7 +57,9 @@ public class StorageService {
     }
 
     public ApiResponse deleteFile(String fileName){
-        File file = new File(fileUploadServerBaseDirectory+fileName);
+        String path = fileUploadServerBaseDirectory+fileName;
+        log.debug("File Path: {}",path);
+        File file = new File(path);
 
         if(!file.exists()){
             throw new InvalidDataException("File not found");
@@ -72,5 +75,21 @@ public class StorageService {
                     .build();
         }
         throw new InvalidDataException("Couldn't delete the file");
+    }
+
+    public boolean isValidURL(String path) {
+        try {
+            new URL(path);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String getFullURL(String fileName){
+        if(fileName!=null && !isValidURL(fileName)){
+            return  fileUploadServerBaseURL+fileName;
+        }
+        return fileName;
     }
 }

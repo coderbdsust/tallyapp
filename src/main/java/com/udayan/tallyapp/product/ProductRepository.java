@@ -21,9 +21,34 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "WHERE p.ownerOrganization.id = :organizationId " +
             "AND (" +
             "LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.code) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :search, '%'))" +
             ")")
     Page<Product> searchProductsByOrganizationAndSearchKey(@Param("organizationId") UUID organizationId, @Param("search") String search, Pageable pageable);
+
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.ownerOrganization.id = :organizationId " +
+            "AND (" +
+            "LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            ")")
+    Page<Product> searchProductsByOrganizationAndProductName(@Param("organizationId") UUID organizationId, @Param("search") String search, Pageable pageable);
+
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.ownerOrganization.id = :organizationId " +
+            "AND (" +
+            "LOWER(p.code) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            ")")
+    Page<Product> searchProductsByOrganizationAndProductCode(@Param("organizationId") UUID organizationId, @Param("search") String search, Pageable pageable);
+
+
+    @Query("SELECT p FROM Product p " +
+            "JOIN p.madeBy e " +
+            "WHERE p.ownerOrganization.id = :organizationId " +
+            "AND (" +
+            "LOWER(e.fullName) LIKE LOWER(CONCAT('%', :search, '%'))" +
+            ")")
+    Page<Product> searchProductsByOrganizationAndEmployeeName(@Param("organizationId") UUID organizationId, @Param("search") String search, Pageable pageable);
+
 
     @Query("SELECT count(p) FROM Product p " +
             "WHERE p.ownerOrganization.id = :organizationId")

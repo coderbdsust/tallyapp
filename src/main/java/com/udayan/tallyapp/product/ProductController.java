@@ -23,9 +23,10 @@ public class ProductController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getProducts(@PathVariable("organizationId") UUID organizationId,
                                          @RequestParam(name = "search", defaultValue = "", required = false) String search,
+                                         @RequestParam(name = "searchCriteria", defaultValue = "", required = false) String searchCriteria,
                                          @RequestParam(name = "page", defaultValue = "0", required = false) int page,
                                          @RequestParam(name = "size", defaultValue = "10", required = false) int size){
-        return ResponseEntity.ok(productService.getProducts(organizationId, search, page, size));
+        return ResponseEntity.ok(productService.getProducts(organizationId, search, searchCriteria, page, size));
     }
 
     @GetMapping("/{organizationId}/total-products")

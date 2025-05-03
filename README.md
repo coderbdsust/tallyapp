@@ -5,9 +5,7 @@ This project is developed to maintain accounting, manufacturing process and empl
 
 ### API
 The following api are implemented so far and still going on.
-<img alt="Preview" src="screenshots/user-v1.png">
-<img alt="Preview" src="screenshots/auth-v1.png">
-<img alt="Preview" src="screenshots/profile-v1.png">
+<img alt="Preview" src="screenshots/tallyapp-api.gif">
 
 ### Guides
 The following guides illustrate how to use some features concretely:

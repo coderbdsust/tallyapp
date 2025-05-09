@@ -14,7 +14,7 @@ public class Login {
     public static class LoginRequest {
         @NotEmpty(message = "{usernameOrEmail.notempty}")
         @Size(min = 4, max = 50, message = "{usernameOrEmail.size}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String username;
         @NotEmpty(message = "{password.notempty}")
         @Size(min = 8, max = 30, message = "{password.size}")

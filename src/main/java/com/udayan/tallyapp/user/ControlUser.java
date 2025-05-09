@@ -11,14 +11,14 @@ public class ControlUser {
     @Data
     public static class RevokeUserToken {
         @Size(min = 4, max = 50, message = "{username.size}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String username;
     }
 
     @Data
     public static class LockUser {
         @Size(min = 4, max = 50, message = "{username.size}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String username;
         @NotNull(message = "{accountlock.notempty}")
         private Boolean accountLocked;
@@ -27,7 +27,7 @@ public class ControlUser {
     @Data
     public static class ChangeUserRole {
         @Size(min = 4, max = 50, message = "{username.size}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private  String username;
         @NotEmpty(message = "{role.notempty}")
         private String role;

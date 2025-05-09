@@ -11,7 +11,7 @@ public class ForgotPassword {
     public static class EmailRequest {
         @NotEmpty(message = "{email.notempty}")
         @NotNull(message = "{email.notempty}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String email;
     }
 
@@ -19,7 +19,7 @@ public class ForgotPassword {
     public static class OtpRequest {
         @NotEmpty(message = "{email.notempty}")
         @NotNull(message = "{email.notempty}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String email;
         @Size(min = 6, max = 6, message = "{otpcode.size}")
         private String otpCode;
@@ -38,7 +38,7 @@ public class ForgotPassword {
     @Builder
     public static class ResetPassword {
         @NotEmpty(message = "{email.notempty}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         String email;
         @Size(min = 6, max = 6, message = "{otpcode.size}")
         private String otpCode;

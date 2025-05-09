@@ -7,7 +7,8 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -20,12 +21,6 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 version = "1.0",
                 termsOfService = "Terms of service"
         ),
-        servers = {
-                @Server(
-                        description = "Local ENV",
-                        url = "http://localhost:8080/"
-                )
-        },
         security = {
                 @SecurityRequirement(
                         name = "bearerAuth"
@@ -41,4 +36,17 @@ import io.swagger.v3.oas.annotations.servers.Server;
         in = SecuritySchemeIn.HEADER
 )
 public class OpenApiConfig {
+
+        @Value("${server.port}")
+        private String port;
+
+        @Value("${server.servlet.context-path}")
+        private String contextPath;
+
+        @Bean
+        public io.swagger.v3.oas.models.OpenAPI customOpenAPI() {
+                String baseUrl = "http://localhost:" + port + contextPath;
+                return new io.swagger.v3.oas.models.OpenAPI()
+                        .addServersItem(new io.swagger.v3.oas.models.servers.Server().url(baseUrl).description("Server URL"));
+        }
 }

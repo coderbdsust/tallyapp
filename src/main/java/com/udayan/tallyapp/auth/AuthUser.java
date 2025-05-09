@@ -49,7 +49,7 @@ public class AuthUser {
     public static class VerifyUserRequest {
         @NotEmpty(message = "{username.notempty}")
         @Size(min = 4, max = 50, message = "{username.size}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String username;
         @NotEmpty(message = "{otpcode.notempty}")
         @Size(min = 6, max = 12, message = "{otpcode.size}")
@@ -60,7 +60,7 @@ public class AuthUser {
     public static class ResendOTPRequest {
         @NotEmpty(message = "{username.notempty}")
         @Size(min = 4, max = 50, message = "{username.size}")
-        @EmailOrUsername
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String username;
     }
 }

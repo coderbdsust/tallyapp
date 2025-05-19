@@ -1,6 +1,8 @@
 package com.udayan.tallyapp.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -16,12 +18,17 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class BeansConfig {
+
+    @Value("${security.allowed.origin.url}")
+    private String securityAllowedOrigin;
 
     private final UserDetailsService userDetailsService;
 
@@ -50,15 +57,13 @@ public class BeansConfig {
 
     @Bean
     public CorsFilter corsFilter() {
+        ArrayList<String> origins = new ArrayList<>(Arrays.asList(securityAllowedOrigin.split(",")));
+        log.debug("Permissible origin {}",origins);
+
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:4200",
-                "http://localhost:1080",
-                "https://tallyapp-ui.firebaseapp.com",
-                "https://tallyapp-ui.web.app"
-        ));
+        config.setAllowedOrigins(origins);
         config.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.ORIGIN,
                 HttpHeaders.CONTENT_TYPE,

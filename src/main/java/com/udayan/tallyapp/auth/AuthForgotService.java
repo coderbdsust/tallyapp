@@ -129,7 +129,7 @@ public class AuthForgotService {
 
         otp.setIsUsed(true);
         otp.setIsActive(false);
-        otp.setUpdatedDate(LocalDateTime.now());
+       // otp.setUpdatedDate(LocalDateTime.now());
         otp.setValidatedTime(LocalDateTime.now());
         UserOTP savedOtp = userOTPRepository.save(otp);
         log.debug("Reset OTP updated : {}", savedOtp);

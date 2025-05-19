@@ -12,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @Slf4j
 public class AppPropertyService {
@@ -55,7 +53,7 @@ public class AppPropertyService {
         appProperty.setAppValue(request.getAppValue());
         appProperty.setAppKey(request.getAppKey());
         appProperty.setProfile(request.getProfile());
-        appProperty.setUpdatedDate(LocalDateTime.now());
+       // appProperty.setUpdatedDate(LocalDateTime.now());
         return appPropertyRepository.save(appProperty);
     }
 
@@ -64,7 +62,7 @@ public class AppPropertyService {
         appProperty.setAppValue(request.getAppValue());
         appProperty.setAppKey(request.getAppKey());
         appProperty.setProfile(request.getProfile());
-        appProperty.setUpdatedDate(LocalDateTime.now());
+       // appProperty.setUpdatedDate(LocalDateTime.now());
 
         try {
             return appPropertyRepository.save(appProperty);

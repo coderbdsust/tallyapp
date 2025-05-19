@@ -23,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -74,7 +73,7 @@ public class UserService {
 
         user.setSalt(Utils.generateSalt(32));
         user.setPassword(passwordEncoder.encode(request.getPassword() + user.getSalt()));
-        user.setUpdatedDate(LocalDateTime.now());
+        //user.setUpdatedDate(LocalDateTime.now());
         userRepository.save(user);
         log.debug("User password changed successfully : {}", user.getUsername());
         //tokenService.revokeUserAllTokens(user, TokenType.ACCESS_TOKEN);
@@ -132,7 +131,7 @@ public class UserService {
         user.setGender(userRequest.getGender());
         user.setDateOfBirth(userRequest.getDateOfBirth());
         user.setMobileNo(userRequest.getMobileNo());
-        user.setUpdatedDate(LocalDateTime.now());
+       // user.setUpdatedDate(LocalDateTime.now());
         userRepository.save(user);
         return getUserProfile(username);
     }

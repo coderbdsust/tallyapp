@@ -255,14 +255,14 @@ public class AuthService {
         userOTP.setIsUsed(true);
         userOTP.setIsActive(false);
         userOTP.setValidatedTime(LocalDateTime.now());
-        userOTP.setUpdatedDate(LocalDateTime.now());
+       // userOTP.setUpdatedDate(LocalDateTime.now());
         userOTPRepository.save(userOTP);
 
         User retrieveUser = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new InvalidDataException("No Registered User Found For Verification"));
 
         retrieveUser.setEnabled(true);
-        retrieveUser.setUpdatedDate(LocalDateTime.now());
+       // retrieveUser.setUpdatedDate(LocalDateTime.now());
         userRepository.save(retrieveUser);
 
         try {

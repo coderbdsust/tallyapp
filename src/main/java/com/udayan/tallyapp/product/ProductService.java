@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -67,7 +66,7 @@ public class ProductService {
         product.setOwnerOrganization(ownerOrganization);
 
         product = productMapper.mergeRequestToEntity(productRequest, product);
-        product.setUpdatedDate(LocalDateTime.now());
+      //  product.setUpdatedDate(LocalDateTime.now());
         try {
             product = productRepository.save(product);
         } catch (DataIntegrityViolationException e) {

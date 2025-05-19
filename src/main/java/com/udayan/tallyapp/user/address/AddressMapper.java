@@ -3,9 +3,8 @@ package com.udayan.tallyapp.user.address;
 import com.udayan.tallyapp.user.User;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,7 +14,7 @@ public class AddressMapper {
         Address address = new Address();
         if (request.getId() != null) {
             address.setId(request.getId());
-            address.setUpdatedDate(LocalDateTime.now());
+          //  address.setUpdatedDate(LocalDateTime.now());
         }
 
         address.setCity(request.getCity());

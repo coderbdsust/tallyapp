@@ -49,4 +49,8 @@ public class RedisRateLimitService {
     public boolean isForgotPasswordOTPValidityAllowed(String key) {
         return isActionAllowed(key, 5, Duration.ofMinutes(1), RateLimit.FORGOT_PASSWORD_OTP_VALIDITY);
     }
+
+    public boolean haveAccountLoginOTPVerificationLimit(String key) {
+        return isActionAllowed(key, 5, Duration.ofMinutes(1), RateLimit.ACCOUNT_LOGIN_OTP);
+    }
 }

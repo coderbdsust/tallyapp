@@ -1,6 +1,7 @@
 package com.udayan.tallyapp.globalexception;
 
 
+import com.udayan.tallyapp.auth.exp.ValidTFAVerificationChannelNotFoundException;
 import com.udayan.tallyapp.customexp.*;
 import com.udayan.tallyapp.fileuploader.FileUploadingException;
 import com.udayan.tallyapp.redis.exp.TooManyRequestException;
@@ -86,6 +87,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             UserNotActiveException.class})
     public ResponseEntity<?> unauthorized(UserNotActiveException ex, HttpServletRequest request) {
+        log.error("",ex);
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(ex.getMessage())
+                .errors(new ArrayList<>())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler({
+            ValidTFAVerificationChannelNotFoundException.class})
+    public ResponseEntity<?> unauthorized(ValidTFAVerificationChannelNotFoundException ex, HttpServletRequest request) {
         log.error("",ex);
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

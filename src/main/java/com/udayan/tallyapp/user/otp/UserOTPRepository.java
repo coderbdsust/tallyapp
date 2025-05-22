@@ -30,4 +30,6 @@ public interface UserOTPRepository extends JpaRepository<UserOTP, UUID> {
      """)
     void revokeAllOTPByUserIDAndOtpType(UUID userId, int otpType);
 
+    Optional<UserOTP> findByIdAndOtp(UUID id, String otp);
+
 }

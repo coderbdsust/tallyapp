@@ -72,4 +72,11 @@ public class Login {
         @NotNull(message = "{otp.txn.notnull}")
         private UUID otpTxnId;
     }
+
+    @Data
+    @Builder
+    public static class ResendLoginOtpRequest {
+        @EmailOrUsername(message = "{usernameOrEmail.format}")
+        private String username;
+    }
 }

@@ -62,4 +62,20 @@ public class UserDTO {
         private String fullName;
         private String email;
     }
+
+    @Data
+    @Builder
+    public static class TFARequest{
+        @NotNull(message = "{tfa.enable.notnull}")
+        private Boolean enable;
+        private Boolean byEmail;
+        private Boolean byMobile;
+    }
+
+    @Data
+    @Builder
+    public static class TFAResponse {
+        private boolean byEmail;
+        private boolean byMobile;
+    }
 }

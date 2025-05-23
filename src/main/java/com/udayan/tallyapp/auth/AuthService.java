@@ -286,7 +286,8 @@ public class AuthService {
                 .message("Successfully verified").build();
     }
 
-    public Object doLogin(Login.LoginRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws UserNotActiveException, UserAccountIsLocked {
+    public Object doLogin(Login.LoginRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse)
+            throws UserNotActiveException, UserAccountIsLocked {
 
         User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username or email"));
@@ -294,39 +295,44 @@ public class AuthService {
         validateUserStatus(user);
 
         String saltedPassword = request.getPassword() + user.getSalt();
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), saltedPassword));
 
-        var auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), saltedPassword)
-        );
+        if (Boolean.TRUE.equals(user.getTfaEnabled())) {
+            log.debug("TFA is enabled for user: {}", user.getUsername());
 
-        if(user.getTfaEnabled()){
-            log.debug("TFA is enabled for this user :{}", user.getUsername());
-            String otpReceiver;
-            String otpChannel;
+            boolean useMobile = Boolean.TRUE.equals(user.getTfaByMobile());
+            boolean useEmail = Boolean.TRUE.equals(user.getTfaByEmail());
 
-            if(Boolean.TRUE.equals(user.getIsMobileNumberVerified())){
-                otpReceiver = user.getMobileNo();
-                otpChannel = "Mobile";
-            }else if(user.isEnabled()){
-                otpReceiver = user.getEmail();
-                otpChannel = "Email";
-            }else{
-                throw new ValidTFAVerificationChannelNotFoundException("Valid TFA channel not found for sending OTP");
+            if (!useMobile && !useEmail) {
+                throw new ValidTFAVerificationChannelNotFoundException("No valid TFA channel found for sending OTP");
             }
 
             UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
-            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+            StringBuilder otpChannels = new StringBuilder();
+
+            if (useMobile) {
+                otpChannels.append("mobile");
+                // TODO: Implement SMS sending logic here
+            }
+
+            if (useEmail) {
+                if (otpChannels.length() > 0) otpChannels.append(" and ");
+                otpChannels.append("email");
+                sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+            }
+
             return Login.TwoFaRequiredResponse.builder()
                     .status(Login.LoginStatus.TFA_REQUIRED)
                     .username(user.getUsername())
-                    .otpChannel(otpChannel)
+                    .otpChannel(otpChannels.toString())
                     .otpTxnId(otp.getId().toString())
-                    .message("OTP is sent to your verified "+otpChannel)
+                    .message("OTP has been sent to your verified " + otpChannels)
                     .build();
         }
 
-       return issueTokens(user, httpRequest, httpResponse);
+        return issueTokens(user, httpRequest, httpResponse);
     }
+
 
     private Object issueTokens(User  user, HttpServletRequest httpRequest, HttpServletResponse httpResponse){
         var claims = createClaims(user);
@@ -532,5 +538,9 @@ public class AuthService {
         userOTPRepository.save(userOTP);
 
         return issueTokens(user, httpRequest, httpResponse);
+    }
+
+    public Object resendLoginOtp(Login.@Valid ResendLoginOtpRequest resendLoginOtpRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        throw  new InvalidDataException("Resend OTP request not implemented!");
     }
 }

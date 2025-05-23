@@ -160,4 +160,58 @@ public class UserService {
                 .build())
                 .toList();
     }
+
+    public Object changeTFAStatus(UserDTO.TFARequest tfaRequest, String username) {
+        User user  = userRepository.findByUsername(username)
+                .orElseThrow(()->new InvalidDataException("User not found"));
+
+        if(tfaRequest.getEnable()){
+            if(tfaRequest.getByEmail()==false && tfaRequest.getByMobile()==false){
+                throw new InvalidDataException("Please choose at least one OTP channel");
+            }
+
+            if(tfaRequest.getByMobile()  && !user.getIsMobileNumberVerified()) {
+                throw new InvalidDataException("Mobile number is not verified");
+            }
+            user.setTfaEnabled(true);
+            user.setTfaByEmail(tfaRequest.getByEmail());
+            user.setTfaByMobile(tfaRequest.getByMobile());
+            userRepository.save(user);
+            return ApiResponse.builder()
+                    .sucs(true)
+                    .userDetail(user.getUsername())
+                    .businessCode(ApiResponse.BusinessCode.OK.getValue())
+                    .message("Two factor authentication is enabled")
+                    .build();
+        }
+
+        user.setTfaEnabled(false);
+        user.setTfaByMobile(false);
+        user.setTfaByEmail(false);
+        userRepository.save(user);
+
+        return ApiResponse.builder()
+                .sucs(true)
+                .userDetail(user.getUsername())
+                .businessCode(ApiResponse.BusinessCode.OK.getValue())
+                .message("Two factor authentication is disabled")
+                .build();
+    }
+
+    public UserDTO.TFAResponse checkTFAStatus(String username) {
+        User user  = userRepository.findByUsername(username)
+                .orElseThrow(()->new InvalidDataException("User not found"));
+
+        if(user.getTfaEnabled()){
+            return UserDTO.TFAResponse.builder()
+                    .byEmail(user.getTfaByEmail())
+                    .byMobile(user.getTfaByMobile())
+                    .build();
+        }else{
+            return UserDTO.TFAResponse.builder()
+                    .byEmail(false)
+                    .byMobile(false)
+                    .build();
+        }
+    }
 }

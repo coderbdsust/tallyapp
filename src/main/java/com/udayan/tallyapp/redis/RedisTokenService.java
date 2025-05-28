@@ -13,9 +13,9 @@ public class RedisTokenService {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public void saveToken(String username, TokenType tokenType, String token, long expirationInMilliSeconds) {
+    public void saveToken(String username, TokenType tokenType, String token, long expirationInSeconds) {
         String key = tokenType+":"+username;
-        redisTemplate.opsForValue().set( key, token, Duration.ofMillis(expirationInMilliSeconds));
+        redisTemplate.opsForValue().set( key, token, Duration.ofSeconds(expirationInSeconds));
     }
 
     public void deleteToken(String username, TokenType tokenType) {

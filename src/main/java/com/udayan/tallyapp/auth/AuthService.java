@@ -46,35 +46,25 @@ import java.util.*;
 public class AuthService {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserOTPRepository userOTPRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
     RedisTokenService redisTokenService;
-
     @Autowired
     RedisRateLimitService redisRateLimitService;
-
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserOTPRepository userOTPRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private TokenService tokenService;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private EmailService emailService;
     @Value("${application.mailing.activation-url}")
     private String accountActivationURL;
 
@@ -98,18 +88,18 @@ public class AuthService {
         Role adminRole = roleRepository.findByName("ADMIN").orElseThrow(() -> new IllegalStateException("Role 'ADMIN' not initiated correctly"));
 
         Optional<User> adminByEmail = userRepository.findByEmail(userRequest.getEmail());
-        if(adminByEmail.isPresent()){
+        if (adminByEmail.isPresent()) {
             userRequest.setId(adminByEmail.get().getId());
             return userRequest;
         }
 
         Optional<User> adminByUsername = userRepository.findByUsername(userRequest.getUsername());
-        if(adminByUsername.isPresent()){
+        if (adminByUsername.isPresent()) {
             userRequest.setId(adminByUsername.get().getId());
             return userRequest;
         }
         Optional<User> adminByMobileNo = userRepository.findByEmail(userRequest.getMobileNo());
-        if(adminByMobileNo.isPresent()){
+        if (adminByMobileNo.isPresent()) {
             userRequest.setId(adminByMobileNo.get().getId());
             return userRequest;
         }
@@ -172,7 +162,7 @@ public class AuthService {
     @Transactional
     public ApiResponse resendAccountVerificationOTP(AuthUser.ResendOTPRequest request) {
 
-        if(!redisRateLimitService.isResendAccountVerificationOTPAllowed(request.getUsername())) {
+        if (!redisRateLimitService.isResendAccountVerificationOTPAllowed(request.getUsername())) {
             throw new TooManyRequestException("Too many request, Please wait and try later");
         }
 
@@ -199,7 +189,7 @@ public class AuthService {
                 .build();
     }
 
-    private UserOTP generateOTPForUserVerification(User user,  long expiryInMinute, OTPType otpType) {
+    private UserOTP generateOTPForUserVerification(User user, long expiryInMinute, OTPType otpType) {
         UserOTP otp = new UserOTP();
         otp.setOtp(Utils.generateOTP(6));
         otp.setExpiryTime(LocalDateTime.now().plusMinutes(expiryInMinute));
@@ -232,17 +222,9 @@ public class AuthService {
     }
 
     @Transactional
-    public ApiResponse verifyUser(String username, String otpCode) throws InvalidDataException {
-        AuthUser.VerifyUserRequest verify = new AuthUser.VerifyUserRequest();
-        verify.setUsername(username);
-        verify.setOtpCode(otpCode);
-        return verifyUser(verify);
-    }
-
-    @Transactional
     public ApiResponse verifyUser(AuthUser.VerifyUserRequest user) throws InvalidDataException {
 
-        if(!redisRateLimitService.isVerifyUserAllowed(user.getUsername())) {
+        if (!redisRateLimitService.isVerifyUserAllowed(user.getUsername())) {
             throw new TooManyRequestException("Too many request, Please wait and try later");
         }
 
@@ -297,44 +279,61 @@ public class AuthService {
         String saltedPassword = request.getPassword() + user.getSalt();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), saltedPassword));
 
-        if (Boolean.TRUE.equals(user.getTfaEnabled())) {
-            log.debug("TFA is enabled for user: {}", user.getUsername());
+        if (!Boolean.TRUE.equals(user.getTfaEnabled()))
+            return issueTokens(user, httpRequest, httpResponse);
 
-            boolean useMobile = Boolean.TRUE.equals(user.getTfaByMobile());
-            boolean useEmail = Boolean.TRUE.equals(user.getTfaByEmail());
+        log.debug("TFA is enabled for user: {}", user.getUsername());
 
-            if (!useMobile && !useEmail) {
-                throw new ValidTFAVerificationChannelNotFoundException("No valid TFA channel found for sending OTP");
-            }
+        boolean useMobile = Boolean.TRUE.equals(user.getTfaByMobile());
+        boolean useEmail = Boolean.TRUE.equals(user.getTfaByEmail());
+        HashMap<TFAProvider, String> otpChannels = new HashMap<>();
+        if (!useMobile && !useEmail) {
+            throw new ValidTFAVerificationChannelNotFoundException("No valid Two Factor Authentication channel found for sending OTP");
+        }
 
-            UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
-            StringBuilder otpChannels = new StringBuilder();
+        if (useMobile) {
+            otpChannels.put(TFAProvider.Mobile, Utils.maskPhoneNumber(user.getMobileNo()));
+        }
 
-            if (useMobile) {
-                otpChannels.append("mobile");
-                // TODO: Implement SMS sending logic here
-            }
+        if (useEmail) {
+            otpChannels.put(TFAProvider.Email, Utils.maskEmail(user.getEmail()));
+        }
 
-            if (useEmail) {
-                if (otpChannels.length() > 0) otpChannels.append(" and ");
-                otpChannels.append("email");
-                sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
-            }
-
-            return Login.TwoFaRequiredResponse.builder()
-                    .status(Login.LoginStatus.TFA_REQUIRED)
+        if (otpChannels.size() > 1) {
+            String pendingLoginToken = Utils.generateSecretKey(32);
+            redisTokenService.saveToken(user.getUsername(), TokenType.PENDING_LOGIN_TOKEN, pendingLoginToken, 600);
+            return Login.TwoFaChannelRequiredResponse.builder()
+                    .status(Login.LoginStatus.TFA_CHANNEL_SELECTION)
                     .username(user.getUsername())
-                    .otpChannel(otpChannels.toString())
-                    .otpTxnId(otp.getId().toString())
-                    .message("OTP has been sent to your verified " + otpChannels)
+                    .otpChannels(otpChannels)
+                    .token(pendingLoginToken)
+                    .message("Please choose the way to confirm it's you")
                     .build();
         }
 
-        return issueTokens(user, httpRequest, httpResponse);
+        UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
+        String defaultChannel = "";
+        if (otpChannels.containsKey(TFAProvider.Mobile)) {
+            //Currently send OTP to email only
+            defaultChannel = "number - " + otpChannels.get(TFAProvider.Mobile);
+            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+        }
+
+        if (otpChannels.containsKey(TFAProvider.Email)) {
+            defaultChannel = "email - " + otpChannels.get(TFAProvider.Email);
+            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+        }
+
+        return Login.TwoFaRequiredResponse.builder()
+                .status(Login.LoginStatus.TFA_REQUIRED)
+                .username(user.getUsername())
+                .otpTxnId(otp.getId().toString())
+                .message("OTP has been sent to your verified " + defaultChannel)
+                .build();
     }
 
 
-    private Object issueTokens(User  user, HttpServletRequest httpRequest, HttpServletResponse httpResponse){
+    private Object issueTokens(User user, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         var claims = createClaims(user);
         String accessToken = jwtService.generateToken(claims, user);
         String refreshToken = jwtService.generateRefreshToken(claims, user);
@@ -409,13 +408,13 @@ public class AuthService {
     private void handleTokens(User user, String accessToken, String refreshToken) {
         tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
         tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
-        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration);
+        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration/1000);
     }
 
 
     public Object refreshToken(HttpServletRequest request, HttpServletResponse response) throws InvalidTokenException, UserNotActiveException, UserAccountIsLocked {
-       String refreshToken;
-       boolean isBrowser = isBrowserRequest(request, Arrays.asList(applicationSecurityWebOrigin.split(",")));
+        String refreshToken;
+        boolean isBrowser = isBrowserRequest(request, Arrays.asList(applicationSecurityWebOrigin.split(",")));
         if (isBrowser) {
             // Web client — read from cookie
             Cookie[] cookies = request.getCookies();
@@ -462,7 +461,7 @@ public class AuthService {
 
             tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
             tokenService.saveUserToken(user, newRefreshToken, TokenType.REFRESH_TOKEN);
-            redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, newAccessToken, accessTokenExpiry);
+            redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, newAccessToken, accessTokenExpiry/1000);
 
             if (isBrowser) {
                 log.debug("Detected browser-based login, setting cookies.");
@@ -492,9 +491,9 @@ public class AuthService {
         String origin = request.getHeader("Origin");
         String referer = request.getHeader("Referer");
 
-        log.debug("userAgent: {}",userAgent);
-        log.debug("origin: {}",origin);
-        log.debug("referer: {}",referer);
+        log.debug("userAgent: {}", userAgent);
+        log.debug("origin: {}", origin);
+        log.debug("referer: {}", referer);
 
         boolean fromUserAgent = userAgent != null && userAgent.toLowerCase().contains("mozilla");
         boolean fromAllowedOrigin = origin != null && allowedOrigins.stream().anyMatch(origin::contains);
@@ -503,7 +502,7 @@ public class AuthService {
         return fromUserAgent || fromAllowedOrigin || fromAllowedReferer;
     }
 
-    public boolean isBrowserRequest(HttpServletRequest request){
+    public boolean isBrowserRequest(HttpServletRequest request) {
         return this.isBrowserRequest(request, Arrays.asList(applicationSecurityWebOrigin.split(",")));
     }
 
@@ -514,15 +513,15 @@ public class AuthService {
 
     public Object verifyLoginOtp(Login.@Valid OtpVerificationRequest otpRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws InvalidTokenException {
 
-        if(!redisRateLimitService.haveAccountLoginOTPVerificationLimit(otpRequest.getUsername())) {
+        if (!redisRateLimitService.haveAccountLoginOTPVerificationLimit(otpRequest.getUsername())) {
             throw new TooManyRequestException("Too many request, Please wait and try later");
         }
 
-        User user  = userRepository.findByUsernameOrEmail(otpRequest.getUsername())
-                .orElseThrow(()->new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByUsernameOrEmail(otpRequest.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         UserOTP userOTP = userOTPRepository.findByIdAndOtp(otpRequest.getOtpTxnId(), otpRequest.getOtp())
-                .orElseThrow(()->new InvalidTokenException("Invalid OTP"));
+                .orElseThrow(() -> new InvalidTokenException("Invalid OTP"));
 
         if (userOTP.getIsUsed() || !userOTP.getIsActive()) {
             throw new InvalidTokenException("Invalid OTP");
@@ -540,7 +539,34 @@ public class AuthService {
         return issueTokens(user, httpRequest, httpResponse);
     }
 
-    public Object resendLoginOtp(Login.@Valid ResendLoginOtpRequest resendLoginOtpRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        throw  new InvalidDataException("Resend OTP request not implemented!");
+    public Login.TwoFaRequiredResponse loginOtpRequest(Login.@Valid LoginOtpRequest loginOtpRequest) throws InvalidTokenException {
+        User  user = userRepository.findByUsername(loginOtpRequest.getUsername())
+                .orElseThrow(()->new UsernameNotFoundException("User not found"));
+
+        boolean pendingTokenValid = redisTokenService.isTokenValid(user.getUsername(), TokenType.PENDING_LOGIN_TOKEN, loginOtpRequest.getToken());
+
+        if(!pendingTokenValid){
+            throw new InvalidTokenException("Invalid token");
+        }
+
+        UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
+        String muskedChannel="";
+        if(loginOtpRequest.getChannel().equals(TFAProvider.Email)){
+            muskedChannel = "email - "+Utils.maskEmail(user.getEmail());
+            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+        }else if(loginOtpRequest.getChannel().equals(TFAProvider.Mobile)){
+            muskedChannel = "email - "+Utils.maskEmail(user.getEmail());
+            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+        }else if(loginOtpRequest.getChannel().equals(TFAProvider.Authenticator)){
+            muskedChannel = "email - "+Utils.maskEmail(user.getEmail());
+            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+        }
+
+        return Login.TwoFaRequiredResponse.builder()
+                .status(Login.LoginStatus.TFA_REQUIRED)
+                .username(user.getUsername())
+                .otpTxnId(otp.getId().toString())
+                .message("OTP has been sent to your verified "+muskedChannel)
+                .build();
     }
 }

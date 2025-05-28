@@ -14,10 +14,10 @@ public class TokenService {
     @Autowired
     private TokenRepository tokenRepository;
 
-    public void saveUserToken(User user, String jwtToken, TokenType tokenType) {
+    public void saveUserToken(User user, String userToken, TokenType tokenType) {
         var token = Token.builder()
                 .user(user)
-                .token(jwtToken)
+                .token(userToken)
                 .expired(false)
                 .revoked(false)
                 .tokenType(tokenType.getValue())

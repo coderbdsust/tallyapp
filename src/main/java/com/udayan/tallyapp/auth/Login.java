@@ -8,12 +8,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 public class Login {
 
     public static enum LoginStatus {
-        SUCCESS, TFA_REQUIRED, ACCOUNT_LOCKED, PASSWORD_RESET_REQUIRED;
+        SUCCESS, TFA_CHANNEL_SELECTION, TFA_REQUIRED, ACCOUNT_LOCKED, PASSWORD_RESET_REQUIRED;
     }
 
     @Data
@@ -54,10 +55,19 @@ public class Login {
 
     @Data
     @Builder
+    public static class TwoFaChannelRequiredResponse {
+        private LoginStatus status;
+        private String username;
+        private Map<TFAProvider, String> otpChannels;
+        private String token;
+        private String message;
+    }
+
+    @Data
+    @Builder
     public static class TwoFaRequiredResponse {
         private LoginStatus status;
         private String username;
-        private String otpChannel;
         private String otpTxnId;
         private String message;
     }
@@ -75,8 +85,10 @@ public class Login {
 
     @Data
     @Builder
-    public static class ResendLoginOtpRequest {
+    public static class LoginOtpRequest {
         @EmailOrUsername(message = "{usernameOrEmail.format}")
         private String username;
+        private TFAProvider channel;
+        private String token;
     }
 }

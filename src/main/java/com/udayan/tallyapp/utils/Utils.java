@@ -62,6 +62,37 @@ public class Utils {
         return Base64.getEncoder().encodeToString(keyBytes);
     }
 
+    public static String maskPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.length() != 11) {
+            throw new IllegalArgumentException("Phone number must be 11 digits");
+        }
+
+        // Keep first 3 and last 2 digits, mask the middle 6 digits
+        String prefix = phoneNumber.substring(0, 3);
+        String suffix = phoneNumber.substring(9); // last 2 digits
+        return prefix + "******" + suffix;
+    }
+
+    public static String maskEmail(String email) {
+        if (email == null || !email.contains("@")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        String[] parts = email.split("@");
+        String local = parts[0];
+        String domain = parts[1];
+
+        if (local.length() <= 4) {
+            return email;
+        }
+
+        String firstTwo = local.substring(0, 2);
+        String lastTwo = local.substring(local.length() - 2);
+        String masked = "*".repeat(local.length() - 4);
+
+        return firstTwo + masked + lastTwo + "@" + domain;
+    }
+
     public static void main(String[] args) {
         System.out.println(Utils.generateActivationCodeKey(50));
         System.out.println(Utils.generateOTP(6));

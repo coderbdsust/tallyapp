@@ -8,8 +8,6 @@ import com.udayan.tallyapp.customexp.DuplicateKeyException;
 import com.udayan.tallyapp.customexp.EmailSendingException;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,14 +40,6 @@ public class AuthAccountController {
     public ResponseEntity<ApiResponse> verifyUserAccount(@Valid @RequestBody AuthUser.VerifyUserRequest user) throws InvalidDataException {
         log.info("request to verify user account {}",user);
         ApiResponse verifiedUser = authService.verifyUser(user);
-        return ResponseEntity.ok().body(verifiedUser);
-    }
-
-    @Deprecated
-    @GetMapping("/account-verify")
-    public ResponseEntity<ApiResponse> verifyUserAccount(@RequestParam(required = true) @NotBlank @Size(min=4, max = 20) String username, @RequestParam(required = true) @NotBlank @Size(min=6, max = 8) String otpCode) throws InvalidDataException {
-        log.info("request to verify user account {}",username);
-        ApiResponse verifiedUser = authService.verifyUser(username, otpCode);
         return ResponseEntity.ok().body(verifiedUser);
     }
 

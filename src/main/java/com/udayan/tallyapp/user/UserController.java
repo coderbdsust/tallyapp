@@ -60,14 +60,14 @@ public class UserController {
         return ResponseEntity.ok(userService.searchUsers(searchKey, page, size));
     }
 
-    @PostMapping("/change-tfa-status")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> changeTFAStatus(@Valid @RequestBody UserDTO.TFARequest tfaRequest) throws InvalidDataException {
-        log.debug("/users/v1/change-tfa-status");
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(userService.changeTFAStatus(tfaRequest, currentUser.getUsername()));
-    }
+//    @PostMapping("/change-tfa-status")
+//    @PreAuthorize("hasRole('USER')")
+//    public ResponseEntity<?> changeTFAStatus(@Valid @RequestBody UserDTO.TFARequest tfaRequest) throws InvalidDataException {
+//        log.debug("/users/v1/change-tfa-status");
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User currentUser = (User) authentication.getPrincipal();
+//        return ResponseEntity.ok(userService.changeTFAStatus(tfaRequest, currentUser.getUsername()));
+//    }
 
     @GetMapping("/tfa-status")
     @PreAuthorize("hasRole('USER')")
@@ -78,5 +78,22 @@ public class UserController {
         return ResponseEntity.ok(userService.checkTFAStatus(currentUser.getUsername()));
     }
 
+    @PostMapping("/change-tfa-status-by-email")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeTFAStatusByEmail(@Valid @RequestBody UserDTO.TFARequest tfaRequest) throws InvalidDataException {
+        log.debug("/users/v1/change-tfa-status-by-email");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(userService.changeTFAByEmail(tfaRequest, currentUser.getUsername()));
+    }
+
+    @PostMapping("/change-tfa-status-by-mobile")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeTFAStatusByMobile(@Valid @RequestBody UserDTO.TFARequest tfaRequest) throws InvalidDataException {
+        log.debug("/users/v1/change-tfa-status-by-mobile");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(userService.changeTFAByMobile(tfaRequest, currentUser.getUsername()));
+    }
 
 }

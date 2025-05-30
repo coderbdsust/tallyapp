@@ -12,6 +12,7 @@ import com.udayan.tallyapp.security.jwt.JwtService;
 import com.udayan.tallyapp.user.GenderType;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
+import com.udayan.tallyapp.user.authenticator.AuthenticatorAppService;
 import com.udayan.tallyapp.user.otp.OTPType;
 import com.udayan.tallyapp.user.otp.UserOTP;
 import com.udayan.tallyapp.user.otp.UserOTPRepository;
@@ -65,6 +66,9 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private AuthenticatorAppService authenticatorAppService;
+
     @Value("${application.mailing.activation-url}")
     private String accountActivationURL;
 
@@ -269,7 +273,7 @@ public class AuthService {
     }
 
     public Object doLogin(Login.LoginRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse)
-            throws UserNotActiveException, UserAccountIsLocked {
+            throws UserNotActiveException, UserAccountIsLocked, InvalidTokenException {
 
         User user = userRepository.findByUsernameOrEmail(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username or email"));
@@ -279,58 +283,79 @@ public class AuthService {
         String saltedPassword = request.getPassword() + user.getSalt();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), saltedPassword));
 
-        if (!Boolean.TRUE.equals(user.getTfaEnabled()))
+        if (!Boolean.TRUE.equals(user.getTfaEnabled())) {
             return issueTokens(user, httpRequest, httpResponse);
+        }
 
-        log.debug("TFA is enabled for user: {}", user.getUsername());
+        Map<TFAProvider, String> otpChannels = getAvailable2FAChannels(user);
 
-        boolean useMobile = Boolean.TRUE.equals(user.getTfaByMobile());
-        boolean useEmail = Boolean.TRUE.equals(user.getTfaByEmail());
-        HashMap<TFAProvider, String> otpChannels = new HashMap<>();
-        if (!useMobile && !useEmail) {
+        if (otpChannels.isEmpty()) {
             throw new ValidTFAVerificationChannelNotFoundException("No valid Two Factor Authentication channel found for sending OTP");
         }
 
-        if (useMobile) {
+        if (otpChannels.size() > 1) {
+            return handleMultiple2FAOptions(user, otpChannels);
+        }
+
+        return handleSingle2FAOption(user, otpChannels.keySet().iterator().next(), otpChannels);
+    }
+    private Map<TFAProvider, String> getAvailable2FAChannels(User user) {
+        Map<TFAProvider, String> otpChannels = new HashMap<>();
+        if (Boolean.TRUE.equals(user.getTfaByMobile())) {
             otpChannels.put(TFAProvider.Mobile, Utils.maskPhoneNumber(user.getMobileNo()));
         }
-
-        if (useEmail) {
+        if (Boolean.TRUE.equals(user.getTfaByEmail())) {
             otpChannels.put(TFAProvider.Email, Utils.maskEmail(user.getEmail()));
         }
-
-        if (otpChannels.size() > 1) {
-            String pendingLoginToken = Utils.generateSecretKey(32);
-            redisTokenService.saveToken(user.getUsername(), TokenType.PENDING_LOGIN_TOKEN, pendingLoginToken, 600);
-            return Login.TwoFaChannelRequiredResponse.builder()
-                    .status(Login.LoginStatus.TFA_CHANNEL_SELECTION)
-                    .username(user.getUsername())
-                    .otpChannels(otpChannels)
-                    .token(pendingLoginToken)
-                    .message("Please choose the way to confirm it's you")
-                    .build();
+        if (Boolean.TRUE.equals(user.getTfaByAuthenticator())) {
+            otpChannels.put(TFAProvider.Authenticator, TFAProvider.Authenticator.name());
         }
+        return otpChannels;
+    }
 
-        UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
-        String defaultChannel = "";
-        if (otpChannels.containsKey(TFAProvider.Mobile)) {
-            //Currently send OTP to email only
-            defaultChannel = "number - " + otpChannels.get(TFAProvider.Mobile);
-            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
-        }
+    private Object handleMultiple2FAOptions(User user, Map<TFAProvider, String> otpChannels) {
+        String pendingLoginToken = Utils.generateSecretKey(32);
+        redisTokenService.saveToken(user.getUsername(), TokenType.PENDING_LOGIN_TOKEN, pendingLoginToken, 600);
 
-        if (otpChannels.containsKey(TFAProvider.Email)) {
-            defaultChannel = "email - " + otpChannels.get(TFAProvider.Email);
-            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
-        }
-
-        return Login.TwoFaRequiredResponse.builder()
-                .status(Login.LoginStatus.TFA_REQUIRED)
+        return Login.TwoFaChannelRequiredResponse.builder()
+                .status(Login.LoginStatus.TFA_CHANNEL_SELECTION)
                 .username(user.getUsername())
-                .otpTxnId(otp.getId().toString())
-                .message("OTP has been sent to your verified " + defaultChannel)
+                .otpChannels(otpChannels)
+                .token(pendingLoginToken)
+                .message("Please choose the way to confirm it's you")
                 .build();
     }
+
+    private Object handleSingle2FAOption(User user, TFAProvider provider, Map<TFAProvider, String> otpChannels) throws InvalidTokenException {
+        switch (provider) {
+            case Mobile:
+            case Email:
+                UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
+                String message = provider == TFAProvider.Mobile
+                        ? "OTP has been sent to your verified number - " + otpChannels.get(provider)
+                        : "OTP has been sent to your verified email - " + otpChannels.get(provider);
+                sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
+                return Login.TwoFaRequiredResponse.builder()
+                        .status(Login.LoginStatus.TFA_REQUIRED)
+                        .username(user.getUsername())
+                        .otpTxnId(otp.getId().toString())
+                        .channel(provider)
+                        .message(message)
+                        .build();
+
+            case Authenticator:
+                return Login.TwoFaRequiredResponse.builder()
+                        .status(Login.LoginStatus.TFA_REQUIRED)
+                        .username(user.getUsername())
+                        .channel(provider)
+                        .message("Please use OTP from your authenticator app")
+                        .build();
+
+            default:
+                throw new InvalidTokenException("Unsupported TFA provider");
+        }
+    }
+
 
 
     private Object issueTokens(User user, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
@@ -408,7 +433,7 @@ public class AuthService {
     private void handleTokens(User user, String accessToken, String refreshToken) {
         tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
         tokenService.saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
-        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration/1000);
+        redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, accessToken, jwtService.jwtExpiration / 1000);
     }
 
 
@@ -461,7 +486,7 @@ public class AuthService {
 
             tokenService.revokeUserAllTokens(user, TokenType.REFRESH_TOKEN);
             tokenService.saveUserToken(user, newRefreshToken, TokenType.REFRESH_TOKEN);
-            redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, newAccessToken, accessTokenExpiry/1000);
+            redisTokenService.saveToken(user.getUsername(), TokenType.ACCESS_TOKEN, newAccessToken, accessTokenExpiry / 1000);
 
             if (isBrowser) {
                 log.debug("Detected browser-based login, setting cookies.");
@@ -520,6 +545,11 @@ public class AuthService {
         User user = userRepository.findByUsernameOrEmail(otpRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        int code = Integer.parseInt(otpRequest.getOtp());
+        if (otpRequest.getChannel().equals(TFAProvider.Authenticator) && authenticatorAppService.isValid(user.getTfaAuthenticatorSecret(), code)) {
+            return issueTokens(user, httpRequest, httpResponse);
+        }
+
         UserOTP userOTP = userOTPRepository.findByIdAndOtp(otpRequest.getOtpTxnId(), otpRequest.getOtp())
                 .orElseThrow(() -> new InvalidTokenException("Invalid OTP"));
 
@@ -540,33 +570,36 @@ public class AuthService {
     }
 
     public Login.TwoFaRequiredResponse loginOtpRequest(Login.@Valid LoginOtpRequest loginOtpRequest) throws InvalidTokenException {
-        User  user = userRepository.findByUsername(loginOtpRequest.getUsername())
-                .orElseThrow(()->new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByUsername(loginOtpRequest.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         boolean pendingTokenValid = redisTokenService.isTokenValid(user.getUsername(), TokenType.PENDING_LOGIN_TOKEN, loginOtpRequest.getToken());
 
-        if(!pendingTokenValid){
+        if (!pendingTokenValid) {
             throw new InvalidTokenException("Invalid token");
         }
 
         UserOTP otp = generateOTPForUserVerification(user, applicationLoginOTPExpiryMinute, OTPType.ACCOUNT_LOGIN);
-        String muskedChannel="";
-        if(loginOtpRequest.getChannel().equals(TFAProvider.Email)){
-            muskedChannel = "email - "+Utils.maskEmail(user.getEmail());
+
+        String message="Unknown OTP channel";
+        TFAProvider channel=TFAProvider.Email;
+
+        if (loginOtpRequest.getChannel().equals(TFAProvider.Email)) {
+            message = "OTP has been sent to your verified email - "+Utils.maskEmail(user.getEmail());
+            channel = TFAProvider.Email;
             sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
-        }else if(loginOtpRequest.getChannel().equals(TFAProvider.Mobile)){
-            muskedChannel = "email - "+Utils.maskEmail(user.getEmail());
-            sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
-        }else if(loginOtpRequest.getChannel().equals(TFAProvider.Authenticator)){
-            muskedChannel = "email - "+Utils.maskEmail(user.getEmail());
+        } else if (loginOtpRequest.getChannel().equals(TFAProvider.Mobile)) {
+            message = "OTP has been sent to your verified mobile - "+Utils.maskPhoneNumber(user.getMobileNo());
+            channel = TFAProvider.Mobile;
             sendEmail(user, otp, EmailTemplateName.TFA_LOGIN_OTP, "Account Login OTP");
         }
 
         return Login.TwoFaRequiredResponse.builder()
                 .status(Login.LoginStatus.TFA_REQUIRED)
                 .username(user.getUsername())
+                .channel(channel)
                 .otpTxnId(otp.getId().toString())
-                .message("OTP has been sent to your verified "+muskedChannel)
+                .message(message)
                 .build();
     }
 }

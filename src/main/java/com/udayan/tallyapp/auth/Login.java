@@ -68,6 +68,7 @@ public class Login {
     public static class TwoFaRequiredResponse {
         private LoginStatus status;
         private String username;
+        private TFAProvider channel;
         private String otpTxnId;
         private String message;
     }
@@ -79,8 +80,10 @@ public class Login {
         private String username;
         @Size(min = 6, max = 6, message = "{otpcode.size}")
         private String otp;
-        @NotNull(message = "{otp.txn.notnull}")
         private UUID otpTxnId;
+        @NotNull
+        private TFAProvider channel;
+
     }
 
     @Data

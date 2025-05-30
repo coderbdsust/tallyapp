@@ -26,14 +26,14 @@ public class AuthLoginController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody Login.LoginRequest loginRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws UserNotActiveException, UserAccountIsLocked {
+    public ResponseEntity<?> login(@Valid @RequestBody Login.LoginRequest loginRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws UserNotActiveException, UserAccountIsLocked, InvalidTokenException {
         log.info("request for login {}", loginRequest.getUsername());
         return ResponseEntity.ok().body(authService.doLogin(loginRequest, httpRequest, httpResponse));
     }
 
     @PostMapping("/verify-login-otp")
     public ResponseEntity<?> verifyLoginOtp(@Valid @RequestBody Login.OtpVerificationRequest otpRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws UserNotActiveException, UserAccountIsLocked, InvalidTokenException {
-        log.info("request for verify-login-otp {}", otpRequest.getUsername());
+        log.info("request for verify-login-otp {}", otpRequest);
         return ResponseEntity.ok().body(authService.verifyLoginOtp(otpRequest, httpRequest, httpResponse));
     }
 

@@ -49,6 +49,8 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private Boolean tfaEnabled=false;
     private Boolean tfaByEmail=false;
     private Boolean tfaByMobile=false;
+    private Boolean tfaByAuthenticator=false;
+    private String  tfaAuthenticatorSecret;
     @ManyToMany(fetch = EAGER)
     private List<Role> roles;
     @OneToMany(mappedBy = "user")

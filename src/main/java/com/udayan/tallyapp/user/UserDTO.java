@@ -67,9 +67,25 @@ public class UserDTO {
     @Builder
     public static class TFARequest{
         @NotNull(message = "{tfa.enable.notnull}")
-        private Boolean enable;
+        private Boolean tfaEnable;
+        private Boolean isChannelEnable;
         private Boolean byEmail;
         private Boolean byMobile;
+        private Boolean byAuthenticator;
+    }
+
+    @Data
+    @Builder
+    public static class AuthenticatorAppResponse{
+        private String qrCode;
+        private String user;
+        private String issuer;
+    }
+
+    @Data
+    @Builder
+    public static class AuthenticatorTfaRequest{
+        private int code;
     }
 
     @Data
@@ -77,5 +93,6 @@ public class UserDTO {
     public static class TFAResponse {
         private boolean byEmail;
         private boolean byMobile;
+        private boolean byAuthenticator;
     }
 }

@@ -26,6 +26,9 @@ public class OrganizationMapper {
                 .image(org.getImage())
                 .avatar(org.getAvatar())
                 .status(org.getStatus())
+                .totalEmployees(org.getEmployees().size())
+                .totalOwners(org.getUser().size())
+                .totalProducts(org.getProducts().size())
                 .build();
     }
 

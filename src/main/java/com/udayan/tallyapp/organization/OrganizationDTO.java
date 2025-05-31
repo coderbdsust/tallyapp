@@ -73,6 +73,9 @@ public class OrganizationDTO {
         private String orgAddressPostcode;
         private String orgAddressCountry;
         private Status status;
+        private Integer totalEmployees=0;
+        private Integer totalProducts=0;
+        private Integer totalOwners=0;
     }
 
     @Data

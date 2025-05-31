@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.employee.Status;
 import com.udayan.tallyapp.model.BaseEntity;
+import com.udayan.tallyapp.product.Product;
 import com.udayan.tallyapp.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -56,5 +57,10 @@ public class Organization extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "employees_id")
     )
     private List<Employee> employees;
+
+    @OneToMany(mappedBy = "ownerOrganization", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @JsonIgnore
+    private List<Product> products;
 
 }

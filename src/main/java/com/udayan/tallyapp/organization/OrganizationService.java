@@ -1,12 +1,17 @@
 package com.udayan.tallyapp.organization;
 
 import com.udayan.tallyapp.common.ApiResponse;
+import com.udayan.tallyapp.common.PageResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.user.User;
 import com.udayan.tallyapp.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +33,11 @@ public class OrganizationService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    OrganizationMapper organizationMapper;
+
     @Transactional
-    public OrganizationDTO.OrganizationRequest createOrganization(OrganizationDTO.OrganizationRequest orgRequest, User currentUser) {
+    public OrganizationDTO.OrganizationRequest saveOrganization(OrganizationDTO.OrganizationRequest orgRequest, User currentUser) {
         Organization org;
         if (orgRequest.getId() != null) {
             log.debug("Looking for organization information using id: " + orgRequest.getId());
@@ -40,26 +48,7 @@ public class OrganizationService {
         } else {
             org = new Organization();
         }
-
-        org.setId(orgRequest.getId());
-        org.setOrgName(orgRequest.getOrgName());
-        org.setOrgRegNumber(orgRequest.getOrgRegNumber());
-        org.setOrgVatNumber(orgRequest.getOrgVatNumber());
-        org.setOrgTinNumber(orgRequest.getOrgTinNumber());
-        org.setOrgMobileNo(orgRequest.getOrgMobileNo());
-        org.setOrgEmail(orgRequest.getOrgEmail());
-        org.setOrgOpenAt(orgRequest.getOrgOpenAt());
-        org.setOrgOpenInWeek(orgRequest.getOrgOpenInWeek());
-        org.setOwner(orgRequest.getOwner());
-        org.setOrgOpeningTitle(orgRequest.getOrgOpeningTitle());
-        org.setSince(orgRequest.getSince());
-        org.setOrgAddressLine(orgRequest.getOrgAddressLine());
-        org.setOrgAddressCity(orgRequest.getOrgAddressCity());
-        org.setOrgAddressPostcode(orgRequest.getOrgAddressPostcode());
-        org.setOrgAddressCountry(orgRequest.getOrgAddressCountry());
-        org.setImage(orgRequest.getImage());
-        org.setAvatar(orgRequest.getAvatar());
-        org.setStatus(orgRequest.getStatus());
+        org = organizationMapper.requestToEntity(org, orgRequest);
         Organization saved = organizationRepository.save(org);
         orgRequest.setId(saved.getId());
 
@@ -72,27 +61,24 @@ public class OrganizationService {
         return orgRequest;
     }
 
-    public List<Organization> getOrganizations(User currentUser) {
+    public List<OrganizationDTO.OrganizationResponse> getOrganizations(User currentUser) {
         List<Organization> organizations = organizationRepository.findByUser(currentUser);
-        return organizations;
+        return organizations.stream().map(org->organizationMapper.entityToResponse(org)).toList();
     }
 
-    public Organization getOrganization(UUID id, User currentUser) {
+    public OrganizationDTO.OrganizationResponse getOrganization(UUID id, User currentUser) {
         Organization organization = organizationRepository.findById(id).orElseThrow(
                 () -> new InvalidDataException("No organization found using this id: " + id)
         );
-        return organization;
+        return organizationMapper.entityToResponse(organization);
     }
 
     @Transactional
     public ApiResponse deleteOrganization(UUID id, User currentUser) {
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new InvalidDataException("Organization not found"));
-
         userOrganizationRepository.deleteUserOrganizationById(id);
-
         organizationRepository.deleteById(id);
-
         return ApiResponse
                 .builder()
                 .sucs(true)
@@ -160,5 +146,26 @@ public class OrganizationService {
                         employee.getMobileNo(),
                         employee.getProfileImage()
                 )).orElse(null);
+    }
+
+    public PageResponse<OrganizationDTO.OrganizationResponse> getOrganizationByPage(int page, int size, User currentUser) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").ascending());
+
+        Page<Organization> organizations = organizationRepository.findByUser(currentUser, pageable);
+
+        List<OrganizationDTO.OrganizationResponse> organizationResponsList =
+                organizations.stream()
+                        .map(organization -> organizationMapper.entityToResponse(organization))
+                        .toList();
+
+        return new PageResponse<>(
+                organizationResponsList,
+                organizations.getNumber(),
+                organizations.getSize(),
+                organizations.getTotalElements(),
+                organizations.getTotalPages(),
+                organizations.isFirst(),
+                organizations.isLast()
+        );
     }
 }

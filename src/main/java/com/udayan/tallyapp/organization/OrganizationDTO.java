@@ -50,6 +50,31 @@ public class OrganizationDTO {
         private Status status;
     }
 
+
+    @Data
+    @Builder
+    public static class OrganizationResponse {
+        private UUID id;
+        private String orgName;
+        private String orgRegNumber;
+        private String orgTinNumber;
+        private String orgVatNumber;
+        private String orgMobileNo;
+        private String orgEmail;
+        private String orgOpenAt;
+        private String orgOpenInWeek;
+        private String orgOpeningTitle;
+        private String owner;
+        private String image;
+        private String avatar;
+        private LocalDate since;
+        private String orgAddressLine;
+        private String orgAddressCity;
+        private String orgAddressPostcode;
+        private String orgAddressCountry;
+        private Status status;
+    }
+
     @Data
     @Builder
     public static class OrganizationTopEmployee {

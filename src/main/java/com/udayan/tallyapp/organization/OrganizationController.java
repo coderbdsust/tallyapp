@@ -30,7 +30,7 @@ public class OrganizationController {
         log.debug("/organization/v1/");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(organizationService.createOrganization(orgRequest, currentUser));
+        return ResponseEntity.ok(organizationService.saveOrganization(orgRequest, currentUser));
     }
 
     @PostMapping("/add-users-to-organization/{organizationId}")
@@ -49,6 +49,16 @@ public class OrganizationController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(organizationService.getOrganizations(currentUser));
+    }
+
+    @GetMapping("/page/list")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getOrganizationByPage(@RequestParam(name = "page", defaultValue = "0", required = false) int page,
+                                                   @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
+        log.debug("/organization/v1/page/list");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(organizationService.getOrganizationByPage(page, size, currentUser));
     }
 
     @GetMapping("/{id}")

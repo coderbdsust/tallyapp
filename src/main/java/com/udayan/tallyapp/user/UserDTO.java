@@ -68,10 +68,6 @@ public class UserDTO {
     public static class TFARequest{
         @NotNull(message = "{tfa.enable.notnull}")
         private Boolean tfaEnable;
-        private Boolean isChannelEnable;
-        private Boolean byEmail;
-        private Boolean byMobile;
-        private Boolean byAuthenticator;
     }
 
     @Data

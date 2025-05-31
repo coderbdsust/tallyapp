@@ -119,7 +119,6 @@ public class AuthService {
         user.setGender(userRequest.getGender());
         user.setRoles(List.of(adminRole));
         user.setEnabled(true);
-        user.setTfaEnabled(false);
         user.setIsMobileNumberVerified(true);
 
         user = userRepository.save(user);
@@ -144,7 +143,6 @@ public class AuthService {
         user.setGender(userRequest.getGender());
         user.setRoles(List.of(userRole));
         user.setEnabled(false);
-        user.setTfaEnabled(false);
         user.setIsMobileNumberVerified(false);
 
         if (userRepository.findByUsername(userRequest.getUsername()).isPresent()) {
@@ -283,7 +281,7 @@ public class AuthService {
         String saltedPassword = request.getPassword() + user.getSalt();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), saltedPassword));
 
-        if (!Boolean.TRUE.equals(user.getTfaEnabled())) {
+        if (!user.isTfaEnabled()) {
             return issueTokens(user, httpRequest, httpResponse);
         }
 
@@ -301,13 +299,13 @@ public class AuthService {
     }
     private Map<TFAProvider, String> getAvailable2FAChannels(User user) {
         Map<TFAProvider, String> otpChannels = new HashMap<>();
-        if (Boolean.TRUE.equals(user.getTfaByMobile())) {
+        if (user.isTfaChannelEnabled(TFAProvider.Mobile)) {
             otpChannels.put(TFAProvider.Mobile, Utils.maskPhoneNumber(user.getMobileNo()));
         }
-        if (Boolean.TRUE.equals(user.getTfaByEmail())) {
+        if (user.isTfaChannelEnabled(TFAProvider.Email)) {
             otpChannels.put(TFAProvider.Email, Utils.maskEmail(user.getEmail()));
         }
-        if (Boolean.TRUE.equals(user.getTfaByAuthenticator())) {
+        if (user.isTfaChannelEnabled(TFAProvider.Authenticator)) {
             otpChannels.put(TFAProvider.Authenticator, TFAProvider.Authenticator.name());
         }
         return otpChannels;
@@ -546,19 +544,20 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         int code = Integer.parseInt(otpRequest.getOtp());
+
         if (otpRequest.getChannel().equals(TFAProvider.Authenticator) && authenticatorAppService.isValid(user.getTfaAuthenticatorSecret(), code)) {
             return issueTokens(user, httpRequest, httpResponse);
         }
 
         UserOTP userOTP = userOTPRepository.findByIdAndOtp(otpRequest.getOtpTxnId(), otpRequest.getOtp())
-                .orElseThrow(() -> new InvalidTokenException("Invalid OTP"));
+                .orElseThrow(() -> new InvalidDataException("Incorrect OTP"));
 
         if (userOTP.getIsUsed() || !userOTP.getIsActive()) {
-            throw new InvalidTokenException("Invalid OTP");
+            throw new InvalidDataException("Incorrect OTP");
         }
 
         if (LocalDateTime.now().isAfter(userOTP.getExpiryTime())) {
-            throw new InvalidTokenException("OTP already expired");
+            throw new InvalidDataException("OTP already expired");
         }
 
         userOTP.setIsUsed(true);

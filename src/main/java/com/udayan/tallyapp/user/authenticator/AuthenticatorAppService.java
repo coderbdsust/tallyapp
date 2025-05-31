@@ -7,6 +7,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.udayan.tallyapp.auth.TFAProvider;
 import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.user.User;
@@ -90,6 +91,11 @@ public class AuthenticatorAppService {
     public UserDTO.AuthenticatorAppResponse authenticatorAppRegister(String username){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()->new InvalidDataException("User not found"));
+
+        if(user.isTfaChannelEnabled(TFAProvider.Authenticator)){
+            throw new InvalidDataException("TFA is enabled by authenticator app already");
+        }
+
         String authenticatorAppSecret = generateKey();
         String qrCode = generateQRUrl(authenticatorAppSecret, user.getEmail());
         user.setTfaAuthenticatorSecret(authenticatorAppSecret);
@@ -112,8 +118,7 @@ public class AuthenticatorAppService {
         boolean isValid = isValid(user.getTfaAuthenticatorSecret(), request.getCode());
 
         if(isValid){
-            user.setTfaEnabled(true);
-            user.setTfaByAuthenticator(true);
+            user.enableTfaChannel(TFAProvider.Authenticator);
             userRepository.save(user);
             return  ApiResponse.builder()
                     .sucs(true)
@@ -138,11 +143,7 @@ public class AuthenticatorAppService {
             throw new InvalidDataException("Invalid OTP");
         }
 
-        if(user.getTfaByMobile()==false && user.getTfaByEmail()==false){
-            user.setTfaEnabled(false);
-        }
-
-        user.setTfaByAuthenticator(false);
+        user.getTfaChannels().remove(TFAProvider.Authenticator);
         user.setTfaAuthenticatorSecret(null);
         userRepository.save(user);
         return ApiResponse.builder()

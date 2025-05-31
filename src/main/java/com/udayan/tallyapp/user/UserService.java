@@ -1,6 +1,7 @@
 package com.udayan.tallyapp.user;
 
 
+import com.udayan.tallyapp.auth.TFAProvider;
 import com.udayan.tallyapp.common.ApiResponse;
 import com.udayan.tallyapp.customexp.DuplicateKeyException;
 import com.udayan.tallyapp.customexp.InvalidDataException;
@@ -135,7 +136,7 @@ public class UserService {
         user.setGender(userRequest.getGender());
         user.setDateOfBirth(userRequest.getDateOfBirth());
         user.setMobileNo(userRequest.getMobileNo());
-       // user.setUpdatedDate(LocalDateTime.now());
+        // user.setUpdatedDate(LocalDateTime.now());
         userRepository.save(user);
         return getUserProfile(username);
     }
@@ -151,17 +152,17 @@ public class UserService {
     }
 
     public List<UserDTO.UserForOrgResponse> searchUsers(String searchKey, int page, int size) {
-        if(searchKey.length() < 5){
+        if (searchKey.length() < 5) {
             throw new InvalidDataException("Minimum search key length is 5");
         }
         Pageable pageable = PageRequest.of(page, size);
         Page<User> users = userRepository.searchUserByUsernameOrEmail(searchKey, pageable);
         return users.stream().map(u -> UserDTO.UserForOrgResponse
-                .builder()
-                .id(u.getId())
-                .fullName(u.getFullName())
-                .email(u.getEmail())
-                .build())
+                        .builder()
+                        .id(u.getId())
+                        .fullName(u.getFullName())
+                        .email(u.getEmail())
+                        .build())
                 .toList();
     }
 
@@ -169,87 +170,88 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new InvalidDataException("User not found"));
 
-        boolean enableTfa = Boolean.TRUE.equals(tfaRequest.getTfaEnable());
-        boolean enableMobileChannel = Boolean.TRUE.equals(tfaRequest.getIsChannelEnable());
-        boolean isMobileVerified = Boolean.TRUE.equals(user.getIsMobileNumberVerified());
-
-        user.setTfaEnabled(enableTfa);
-
-        if (enableTfa) {
-            if (enableMobileChannel && isMobileVerified) {
-                user.setTfaByMobile(true);
-                userRepository.save(user);
-                return buildApiResponse(user.getUsername(), "Two factor authentication is enabled using mobile");
-            } else {
-                user.setTfaByMobile(false); // Disable mobile channel if either flag is false or mobile is unverified
-                userRepository.save(user);
-                String message = isMobileVerified
-                        ? "Two factor authentication is disabled using mobile"
-                        : "Cannot enable TFA via mobile: mobile number is not verified";
-                return buildApiResponse(user.getUsername(), message);
-            }
+        if (!user.getIsMobileNumberVerified()) {
+            return buildApiResponse(
+                    false,
+                    ApiResponse.BusinessCode.MOBILE_NOT_VERIFIED,
+                    user.getUsername(),
+                    "Please verify your mobile number first"
+            );
         }
 
-        // If TFA is disabled, disable mobile channel too
-        user.setTfaByMobile(false);
-        userRepository.save(user);
-        return buildApiResponse(user.getUsername(), "Two factor authentication is disabled");
+        boolean enableTfa = Boolean.TRUE.equals(tfaRequest.getTfaEnable());
+
+        if (enableTfa) {
+            return enableMobileTFA(user);
+        } else {
+            return disableMobileTFA(user);
+        }
     }
+
+    private ApiResponse enableMobileTFA(User user) {
+        user.enableTfaChannel(TFAProvider.Mobile);
+        userRepository.save(user);
+
+        return buildApiResponse(
+                true,
+                ApiResponse.BusinessCode.OK,
+                user.getUsername(),
+                "Two factor authentication is enabled using mobile"
+        );
+    }
+
+    private ApiResponse disableMobileTFA(User user) {
+        user.disableTfaChannel(TFAProvider.Mobile);
+        userRepository.save(user);
+
+        String message = user.isTfaEnabled()
+                ? "Two factor authentication is disabled using mobile"
+                : "Two factor authentication is disabled";
+
+        return buildApiResponse(
+                false,
+                ApiResponse.BusinessCode.OK,
+                user.getUsername(),
+                message
+        );
+    }
+
 
     public ApiResponse changeTFAByEmail(UserDTO.TFARequest tfaRequest, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new InvalidDataException("User not found"));
-
         boolean enableTfa = Boolean.TRUE.equals(tfaRequest.getTfaEnable());
-        boolean enableEmailChannel = Boolean.TRUE.equals(tfaRequest.getIsChannelEnable());
-
-        user.setTfaEnabled(enableTfa);
-
         if (enableTfa) {
-            user.setTfaByEmail(enableEmailChannel);
+            user.enableTfaChannel(TFAProvider.Email);
             userRepository.save(user);
-
-            String message = enableEmailChannel
-                    ? "Two factor authentication is enabled using email"
-                    : "Two factor authentication is disabled using email";
-
-            return buildApiResponse(user.getUsername(), message);
+            String message = "Two factor authentication is enabled using email";
+            return buildApiResponse(true, ApiResponse.BusinessCode.OK, user.getUsername(), message);
         }
-
-        // If TFA is disabled, turn off email channel too
-        user.setTfaByEmail(false);
+        user.disableTfaChannel(TFAProvider.Email);
         userRepository.save(user);
-
-        return buildApiResponse(user.getUsername(), "Two factor authentication is disabled");
+        String msg = user.isTfaEnabled() ? "Two factor authentication is disabled using email" : "Two factor authentication is disabled";
+        return buildApiResponse(false, ApiResponse.BusinessCode.OK, user.getUsername(), msg);
     }
 
-    private ApiResponse buildApiResponse(String username, String message) {
+    private ApiResponse buildApiResponse(Boolean sucs, ApiResponse.BusinessCode code, String username, String message) {
         return ApiResponse.builder()
-                .sucs(true)
+                .sucs(sucs)
                 .userDetail(username)
-                .businessCode(ApiResponse.BusinessCode.OK.getValue())
+                .businessCode(code.getValue())
                 .message(message)
                 .build();
     }
 
 
     public UserDTO.TFAResponse checkTFAStatus(String username) {
-        User user  = userRepository.findByUsername(username)
-                .orElseThrow(()->new InvalidDataException("User not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new InvalidDataException("User not found"));
 
-        if(user.getTfaEnabled()){
-            return UserDTO.TFAResponse.builder()
-                    .byEmail(user.getTfaByEmail())
-                    .byMobile(user.getTfaByMobile())
-                    .byAuthenticator(user.getTfaByAuthenticator())
-                    .build();
-        }else{
-            return UserDTO.TFAResponse.builder()
-                    .byEmail(false)
-                    .byMobile(false)
-                    .byAuthenticator(false)
-                    .build();
-        }
+        return UserDTO.TFAResponse.builder()
+                .byEmail(user.isTfaChannelEnabled(TFAProvider.Email))
+                .byMobile(user.isTfaChannelEnabled(TFAProvider.Mobile))
+                .byAuthenticator(user.isTfaChannelEnabled(TFAProvider.Authenticator))
+                .build();
     }
 
 

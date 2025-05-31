@@ -1,6 +1,7 @@
 package com.udayan.tallyapp.user;
 
 
+import com.udayan.tallyapp.auth.TFAProvider;
 import com.udayan.tallyapp.model.BaseEntity;
 import com.udayan.tallyapp.organization.Organization;
 import com.udayan.tallyapp.user.address.Address;
@@ -46,10 +47,11 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private LocalDate dateOfBirth;
     private Boolean enabled = false;
     private Boolean accountLocked=false;
-    private Boolean tfaEnabled=false;
-    private Boolean tfaByEmail=false;
-    private Boolean tfaByMobile=false;
-    private Boolean tfaByAuthenticator=false;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "user_tfa_channels", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "channel")
+    private List<TFAProvider> tfaChannels = new ArrayList<>();
     private String  tfaAuthenticatorSecret;
     @ManyToMany(fetch = EAGER)
     private List<Role> roles;
@@ -94,6 +96,24 @@ public class User extends BaseEntity implements UserDetails, Principal {
 
     public ArrayList<String> getUserRoles() {
         return this.roles.stream().map(Role::getName).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public boolean isTfaEnabled(){
+        return !tfaChannels.isEmpty();
+    }
+
+    public boolean isTfaChannelEnabled(TFAProvider channel) {
+        return tfaChannels.contains(channel);
+    }
+
+    public void enableTfaChannel(TFAProvider channel) {
+        if (!tfaChannels.contains(channel)) {
+            tfaChannels.add(channel);
+        }
+    }
+
+    public void disableTfaChannel(TFAProvider channel) {
+        tfaChannels.remove(channel);
     }
 
     @Override

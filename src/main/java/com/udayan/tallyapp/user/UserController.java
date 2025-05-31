@@ -60,15 +60,6 @@ public class UserController {
         return ResponseEntity.ok(userService.searchUsers(searchKey, page, size));
     }
 
-//    @PostMapping("/change-tfa-status")
-//    @PreAuthorize("hasRole('USER')")
-//    public ResponseEntity<?> changeTFAStatus(@Valid @RequestBody UserDTO.TFARequest tfaRequest) throws InvalidDataException {
-//        log.debug("/users/v1/change-tfa-status");
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User currentUser = (User) authentication.getPrincipal();
-//        return ResponseEntity.ok(userService.changeTFAStatus(tfaRequest, currentUser.getUsername()));
-//    }
-
     @GetMapping("/tfa-status")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> checkTFAStatus() throws InvalidDataException {

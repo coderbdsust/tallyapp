@@ -51,7 +51,7 @@ public class UserMapper {
                 .gender(user.getGender())
                 .username(user.getUsername())
                 .mobileNo(user.getMobileNo())
-                .tfaEnabled(user.getTfaEnabled())
+                .tfaEnabled(user.isTfaEnabled())
                 .createdDate(user.getCreatedDate())
                 .roles(user.getUserRoles())
                 .addressList(addressResponseList)

@@ -20,4 +20,10 @@ public interface UserOrganizationRepository extends JpaRepository<UserOrganizati
     @Query("SELECT uo FROM UserOrganization uo WHERE uo.id.organizationsId = :organizationId")
     List<UserOrganization> findAllUserOrganizationById(@Param("organizationId") UUID organizationId);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM UserOrganization uo WHERE uo.id.userId = :userId AND uo.id.organizationsId = :organizationId")
+    void deleteByUserIdAndOrganizationId(@Param("userId") UUID userId, @Param("organizationId") UUID organizationId);
+
+
 }

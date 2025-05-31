@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequestMapping("/employee/v1")
 @Slf4j
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('MANAGER')")
 public class EmployeeController {
 
     @Autowired

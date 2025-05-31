@@ -5,6 +5,7 @@ import com.udayan.tallyapp.common.PageResponse;
 import com.udayan.tallyapp.customexp.InvalidDataException;
 import com.udayan.tallyapp.employee.Employee;
 import com.udayan.tallyapp.user.User;
+import com.udayan.tallyapp.user.UserDTO;
 import com.udayan.tallyapp.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +52,7 @@ public class OrganizationService {
         orgRequest.setId(saved.getId());
 
         User user = userRepository.findByUsername(currentUser.getUsername())
-                .orElseThrow(()->new InvalidDataException("Invalid user for organization registry"));
+                .orElseThrow(() -> new InvalidDataException("Invalid user for organization registry"));
 
         user.getOrganizations().add(saved);
         userRepository.save(user);
@@ -63,7 +62,7 @@ public class OrganizationService {
 
     public List<OrganizationDTO.OrganizationResponse> getOrganizations(User currentUser) {
         List<Organization> organizations = organizationRepository.findByUser(currentUser);
-        return organizations.stream().map(org->organizationMapper.entityToResponse(org)).toList();
+        return organizations.stream().map(org -> organizationMapper.entityToResponse(org)).toList();
     }
 
     public OrganizationDTO.OrganizationResponse getOrganization(UUID id, User currentUser) {
@@ -128,14 +127,14 @@ public class OrganizationService {
 
     public Long getOrganizationTotalEmployee(UUID orgId, User currentUser) {
         Organization organization = organizationRepository.findById(orgId).orElseThrow(
-                ()->new InvalidDataException("Invalid organization id")
+                () -> new InvalidDataException("Invalid organization id")
         );
         return (long) organization.getEmployees().size();
     }
 
     public OrganizationDTO.OrganizationTopEmployee getOrganizationTopEmployee(UUID orgId, User currentUser) {
         Organization organization = organizationRepository.findById(orgId).orElseThrow(
-                ()->new InvalidDataException("Invalid organization id")
+                () -> new InvalidDataException("Invalid organization id")
         );
 
         return organization.getEmployees().stream()
@@ -167,5 +166,47 @@ public class OrganizationService {
                 organizations.isFirst(),
                 organizations.isLast()
         );
+    }
+
+    public OrganizationDTO.OrganizationOwnerResponse getOrganizationOwnerList(UUID organizationId) {
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new InvalidDataException("Organization not found"));
+
+        OrganizationDTO.OrganizationResponse orgRes = organizationMapper.entityToResponse(organization);
+
+        List<UserOrganization> organizationOwnerList = userOrganizationRepository.findAllUserOrganizationById(organizationId);
+
+        HashSet<UserDTO.UserForOrgResponse> ownerList = new HashSet<>();
+
+        for (UserOrganization u : organizationOwnerList) {
+            UserDTO.UserForOrgResponse owner = UserDTO.UserForOrgResponse.builder()
+                    .id(u.getUser().getId())
+                    .email(u.getUser().getEmail())
+                    .fullName(u.getUser().getFullName())
+                    .build();
+            ownerList.add(owner);
+        }
+
+        return OrganizationDTO.OrganizationOwnerResponse.builder()
+                .owners(ownerList)
+                .organization(orgRes)
+                .build();
+    }
+
+    public Object removeOwnerFromOrganization(UUID organizationId, List<UUID> userIds, User  currentUser) {
+        if(userIds.contains(currentUser.getId())){
+            throw new InvalidDataException("You can't remove yourself from organization");
+        }
+
+       for(UUID userId:userIds){
+           userOrganizationRepository.deleteByUserIdAndOrganizationId(userId, organizationId);
+       }
+
+       return ApiResponse.builder()
+               .sucs(true)
+               .userDetail(currentUser.getUsername())
+               .businessCode(ApiResponse.BusinessCode.OK.getValue())
+               .message("User successfully remove from organization")
+               .build();
     }
 }

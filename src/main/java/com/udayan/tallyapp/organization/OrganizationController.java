@@ -19,13 +19,13 @@ import java.util.UUID;
 @RequestMapping("/organization/v1")
 @Slf4j
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('MANAGER')")
 public class OrganizationController {
 
     @Autowired
     OrganizationService organizationService;
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addOrganization(@Valid @RequestBody OrganizationDTO.OrganizationRequest orgRequest) {
         log.debug("/organization/v1/");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,8 +42,22 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.addUsersToOrganization(organizationId, userIds, currentUser));
     }
 
+    @GetMapping("/get-owner-list/{organizationId}")
+    public ResponseEntity<?> getOrganizationOwnerList(@PathVariable("organizationId") UUID organizationId) {
+        log.debug("/organization/v1/get-owner-list : {}",organizationId);
+        return ResponseEntity.ok(organizationService.getOrganizationOwnerList(organizationId));
+    }
+
+    @PostMapping("/remove-owner-from-organization/{organizationId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> removeOwnerFromOrganization(@PathVariable("organizationId") UUID organizationId, @RequestBody List<UUID> userIds) {
+        log.debug("/organization/v1/get-owner-list : {}",organizationId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(organizationService.removeOwnerFromOrganization(organizationId, userIds, currentUser));
+    }
+
     @GetMapping("/list")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getOrganizations() {
         log.debug("/organization/v1/list");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -52,7 +66,6 @@ public class OrganizationController {
     }
 
     @GetMapping("/page/list")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getOrganizationByPage(@RequestParam(name = "page", defaultValue = "0", required = false) int page,
                                                    @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
         log.debug("/organization/v1/page/list");
@@ -62,7 +75,6 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getOrganization(@PathVariable UUID id) {
         log.debug("/organization/v1/{}",id);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -71,7 +83,6 @@ public class OrganizationController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteOrganization(@PathVariable UUID id) {
         log.debug("/organization/v1/{}",id);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

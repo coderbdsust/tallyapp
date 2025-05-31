@@ -2,6 +2,7 @@ package com.udayan.tallyapp.organization;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.udayan.tallyapp.employee.Status;
+import com.udayan.tallyapp.user.UserDTO;
 import com.udayan.tallyapp.user.deserializer.DatePatternDeserializer;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class OrganizationDTO {
@@ -85,5 +87,12 @@ public class OrganizationDTO {
         private LocalDate dateOfBirth;
         private String mobileNo;
         private String profileImage;
+    }
+
+    @Data
+    @Builder
+    public static class OrganizationOwnerResponse{
+        private OrganizationResponse organization;
+        private HashSet<UserDTO.UserForOrgResponse> owners=new HashSet<>();
     }
 }

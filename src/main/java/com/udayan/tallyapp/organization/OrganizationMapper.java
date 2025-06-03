@@ -2,6 +2,8 @@ package com.udayan.tallyapp.organization;
 
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+
 @Service
 public class OrganizationMapper {
 
@@ -25,10 +27,11 @@ public class OrganizationMapper {
                 .orgAddressCountry(org.getOrgAddressCountry())
                 .image(org.getImage())
                 .avatar(org.getAvatar())
+                .logo(org.getLogo())
                 .status(org.getStatus())
-                .totalEmployees(org.getEmployees().size())
-                .totalOwners(org.getUser().size())
-                .totalProducts(org.getProducts().size())
+                .totalEmployees(new HashSet<>(org.getEmployees()).size())
+                .totalOwners(new HashSet<>(org.getUser()).size())
+                .totalProducts(new HashSet<>(org.getProducts()).size())
                 .build();
     }
 
@@ -51,6 +54,7 @@ public class OrganizationMapper {
         org.setOrgAddressCountry(orgRequest.getOrgAddressCountry());
         org.setImage(orgRequest.getImage());
         org.setAvatar(orgRequest.getAvatar());
+        org.setLogo(orgRequest.getLogo());
         org.setStatus(orgRequest.getStatus());
         return org;
     }

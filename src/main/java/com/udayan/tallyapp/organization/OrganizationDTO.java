@@ -37,6 +37,7 @@ public class OrganizationDTO {
         private String owner;
         private String image;
         private String avatar;
+        private String logo;
         @Past(message = "Organization start date must be from past")
         @JsonDeserialize(using= DatePatternDeserializer.class )
         private LocalDate since;
@@ -69,6 +70,7 @@ public class OrganizationDTO {
         private String owner;
         private String image;
         private String avatar;
+        private String logo;
         private LocalDate since;
         private String orgAddressLine;
         private String orgAddressCity;

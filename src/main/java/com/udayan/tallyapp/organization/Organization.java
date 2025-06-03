@@ -41,6 +41,7 @@ public class Organization extends BaseEntity {
     private Status status;
     private String owner;
     private String image;
+    private String logo;
     private String avatar;
 
     @ManyToMany(mappedBy = "organizations")

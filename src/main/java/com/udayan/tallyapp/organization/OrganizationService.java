@@ -36,7 +36,7 @@ public class OrganizationService {
     OrganizationMapper organizationMapper;
 
     @Transactional
-    public OrganizationDTO.OrganizationRequest saveOrganization(OrganizationDTO.OrganizationRequest orgRequest, User currentUser) {
+    public OrganizationDTO.OrganizationResponse saveOrganization(OrganizationDTO.OrganizationRequest orgRequest, User currentUser) {
         Organization org;
         if (orgRequest.getId() != null) {
             log.debug("Looking for organization information using id: " + orgRequest.getId());
@@ -48,16 +48,18 @@ public class OrganizationService {
             org = new Organization();
         }
         org = organizationMapper.requestToEntity(org, orgRequest);
-        Organization saved = organizationRepository.save(org);
-        orgRequest.setId(saved.getId());
+        Organization savedOrg = organizationRepository.save(org);
+        orgRequest.setId(savedOrg.getId());
 
         User user = userRepository.findByUsername(currentUser.getUsername())
                 .orElseThrow(() -> new InvalidDataException("Invalid user for organization registry"));
 
-        user.getOrganizations().add(saved);
-        userRepository.save(user);
+        if(!user.getOrganizations().contains(savedOrg)) {
+            user.getOrganizations().add(savedOrg);
+            userRepository.save(user);
+        }
 
-        return orgRequest;
+        return organizationMapper.entityToResponse(savedOrg);
     }
 
     public List<OrganizationDTO.OrganizationResponse> getOrganizations(User currentUser) {
